@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Backend real: intenta obtener el perfil
-        const res = await api.get<User>("/users/profile/");
+        const res = await api.get<User>("/users/profile");
         setUser(res.data ?? null);
       } catch {
         setUser(null);
@@ -71,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return true;
       }
 
-      // Backend real (Django DRF / JWT por lo que se ve en tu /lib/api)
-      const res = await api.post<AuthResponse>("/users/login/", {
+      // Backend real (Next.js API Routes)
+      const res = await api.post<AuthResponse>("/auth/login", {
         email: email.trim().toLowerCase(),
         password,
       });
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const refresh = localStorage.getItem("refresh");
       if (refresh) {
-        await api.post("/users/logout/", { refresh });
+        await api.post("/auth/logout", { refresh });
       }
     } catch {
       // silencio: si el backend no está, igualmente limpiamos tokens

@@ -3,12 +3,12 @@ import type { Conversation, Message, MessagesPage } from "@/types/chat";
 
 // Conversaciones
 export async function listConversations() {
-  const res = await API.get("chat/conversations/");
+  const res = await API.get("/chat/conversations");
   return res.data as Conversation[];
 }
 
 export async function createOneToOne(otherUserId: number) {
-  const res = await API.post("chat/conversations/create/", {
+  const res = await API.post("/chat/conversations", {
     is_group: false,
     users: [otherUserId],
   });
@@ -16,46 +16,49 @@ export async function createOneToOne(otherUserId: number) {
 }
 
 export async function getConversation(id: number): Promise<Conversation> {
-  const res = await API.get(`chat/conversations/${id}/`);
+  const res = await API.get(`/chat/conversations/${id}`);
   return res.data as Conversation;
 }
 
-// Mensajes (compat histórico)
-export async function listMessages(conversationId: number): Promise<Message[]> {
-  // Mantengo esta firma por compatibilidad (retorna todos los mensajes actuales, si tu backend lo permite)
-  const res = await API.get(`chat/conversations/${conversationId}/messages/`);
-  // Si el backend ahora usa cursor, puede devolver {results:[]}; normalizamos:
+// Mensajes (con paginación simple)
+export async function listMessages(conversationId: number, page: number = 1): Promise<Message[]> {
+  const res = await API.get(`/chat/conversations/${conversationId}/messages`, {
+    params: { page, page_size: 50 }
+  });
   const data = res.data;
-  if (data && Array.isArray(data)) return data as Message[];
   if (data && Array.isArray(data.results)) {
-    // devolver en orden ascendente (antiguos->nuevos) como esperaba tu página
-    return [...data.results].reverse();
+    return data.results as Message[];
   }
   return [];
 }
 
-// 🔁 Mensajes con cursor (NUEVO)
+// Paginación mejorada (compatible con el backend)
 export async function listMessagesPage(
   conversationId: number,
-  params?: { cursor?: string; page_size?: number }
+  params?: { page?: number; page_size?: number }
 ): Promise<MessagesPage> {
-  const res = await API.get(`chat/conversations/${conversationId}/messages/`, {
-    params: params?.cursor ? { cursor: params.cursor } : { page_size: params?.page_size ?? 30 },
+  const res = await API.get(`/chat/conversations/${conversationId}/messages`, {
+    params: { 
+      page: params?.page ?? 1, 
+      page_size: params?.page_size ?? 50 
+    },
   });
-  // Garantizamos shape DRF CursorPagination
+  
+  // Nuestro backend devuelve { results, count, page, page_size }
+  // Lo adaptamos al formato esperado
   return {
-    results: res.data?.results ?? (Array.isArray(res.data) ? res.data : []),
-    next: res.data?.next ?? null,
-    previous: res.data?.previous ?? null,
+    results: res.data?.results ?? [],
+    next: null, // Por ahora no usamos cursor, sino paginación simple
+    previous: null,
   };
 }
 
 export async function sendMessage(conversationId: number, content: string) {
-  const res = await API.post(`chat/conversations/${conversationId}/messages/`, { content });
+  const res = await API.post(`/chat/conversations/${conversationId}/messages`, { content });
   return res.data as Message;
 }
 
 export async function markConversationRead(conversationId: number) {
-  const res = await API.post(`chat/conversations/${conversationId}/read/`);
+  const res = await API.post(`/chat/conversations/${conversationId}/read`);
   return res.data;
 }

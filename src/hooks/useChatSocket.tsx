@@ -1,12 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { wsUrl } from "@/lib/ws";
-
-const token = typeof window !== "undefined" ? (localStorage.getItem("access") ?? undefined) : undefined;
-const url = wsUrl(`/ws/health/`, token); // o tu ruta /ws/chat/<id>/
-const ws = new WebSocket(url);
-
 
 type BaseMessage = {
   id: number;
@@ -31,18 +25,21 @@ export function useChatSocket(conversationId: number | null) {
     const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
     if (!token) return;
 
-    const wsUrl = `${window.location.origin.replace(/^http/, "ws")}/ws/chat/${conversationId}/`;
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    // TODO: Implementar WebSocket real cuando se necesite
+    // Por ahora, el chat funciona con polling/HTTP requests
+    // const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // const wsUrl = `${wsProtocol}//${window.location.host}/ws/chat/${conversationId}/?token=${token}`;
+    // const ws = new WebSocket(wsUrl);
+    // wsRef.current = ws;
 
-    ws.onopen = () => setConnected(true);
-    ws.onclose = () => setConnected(false);
+    // ws.onopen = () => setConnected(true);
+    // ws.onclose = () => setConnected(false);
+    // ws.onerror = () => setConnected(false);
 
-    // Si el backend envía error 403 en conexión, simplemente permanecerá desconectado
-    return () => {
-      ws.close();
-      wsRef.current = null;
-    };
+    // return () => {
+    //   ws.close();
+    //   wsRef.current = null;
+    // };
   }, [conversationId]);
 
   const sendMessage = (content: string) => {
@@ -55,11 +52,11 @@ export function useChatSocket(conversationId: number | null) {
     wsRef.current.send(JSON.stringify({ action: "read" }));
   };
 
-  // NUEVO: typing
   const sendTypingStart = () => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
     wsRef.current.send(JSON.stringify({ action: "typing.start" }));
   };
+
   const sendTypingStop = () => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
     wsRef.current.send(JSON.stringify({ action: "typing.stop" }));
