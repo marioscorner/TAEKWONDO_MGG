@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import HeaderPublic from "@/components/HeaderPublic";
 import HeaderPrivate from "@/components/HeaderPrivate";
 import FooterPublic from "@/components/Footer";
@@ -11,8 +12,8 @@ function LayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { user, loading } = useAuth();
   
-  // Si está autenticado, siempre mostrar HeaderPrivate
-  // Si no está autenticado, mostrar HeaderPublic
+  // Si está autenticado: HeaderPrivate
+  // Si no está autenticado o está cargando: HeaderPublic
   const showPrivateHeader = !loading && user !== null;
 
   return (
@@ -34,8 +35,10 @@ function LayoutContent({ children }: { children: ReactNode }) {
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider>
-      <LayoutContent>{children}</LayoutContent>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <LayoutContent>{children}</LayoutContent>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

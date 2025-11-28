@@ -2,17 +2,18 @@
 // Añade: cursor pagination (Cargar más), typing indicator y soporte a seen_by_other si viene del backend.
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { listMessages, listMessagesPage, markConversationRead, getConversation } from "@/lib/chat";
 import type { Message, Conversation, MessagesPage } from "@/types/chat";
 import Link from "next/link";
 
-type PageProps = { params: { id: string } };
+type PageProps = { params: Promise<{ id: string }> };
 
 export default function ChatDetailPage({ params }: PageProps) {
-  const conversationId = Number(params.id);
+  const resolvedParams = use(params);
+  const conversationId = Number(resolvedParams.id);
   const { user } = useAuth();
 
   const [conv, setConv] = useState<Conversation | null>(null);
@@ -58,9 +59,10 @@ export default function ChatDetailPage({ params }: PageProps) {
       try {
         // Intento con cursor
         const page: MessagesPage = await listMessagesPage(conversationId, { page_size: 30 });
-        const asc = [...page.results].reverse();
+        // Los mensajes vienen ordenados DESC (más recientes primero), los invertimos para mostrar más antiguos arriba
+        const sorted = [...page.results].reverse();
         if (mounted) {
-          setMessages(asc);
+          setMessages(sorted);
           setNextCursor(page.next);
           
           // Actualizar último ID conocido
@@ -83,8 +85,12 @@ export default function ChatDetailPage({ params }: PageProps) {
         // Compat: si falla por cursor, usa la lista simple existente
         try {
           const data: Message[] = await listMessages(conversationId);
+          // Ordenar por fecha ascendente (más antiguos primero)
+          const sorted = [...data].sort((a, b) => 
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
           if (mounted) {
-            setMessages(data);
+            setMessages(sorted);
             
             // Scroll al final
             setTimeout(() => {
@@ -114,8 +120,9 @@ export default function ChatDetailPage({ params }: PageProps) {
         headers: { Authorization: `Bearer ${localStorage.getItem("access") || ""}` },
       });
       const page = (await res.json()) as MessagesPage;
-      const extraAsc = [...page.results].reverse();
-      setMessages((prev) => [...extraAsc, ...prev]);
+      // Los mensajes antiguos van al principio
+      const sorted = [...page.results].reverse();
+      setMessages((prev) => [...sorted, ...prev]);
       setNextCursor(page.next);
     } catch {
       // noop
@@ -173,8 +180,10 @@ export default function ChatDetailPage({ params }: PageProps) {
     const v = text.trim();
     if (!v) return;
     setText("");
+    if (user?.id) {
+      sendTypingStop(user.id);
+    }
     await sendMessage(v);
-    sendTypingStop();
     
     // Scroll al final después de enviar
     setTimeout(() => {
@@ -210,25 +219,25 @@ export default function ChatDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-160px)] flex-col rounded-lg border bg-white">
+    <div className="flex h-[calc(100vh-160px)] flex-col rounded-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       {/* Header */}
-      <div className="flex items-center justify-between border-b px-4 py-3">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-3 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center gap-2">
-          <Link href="/app/private/chats" className="text-sm text-blue-600 underline">
+          <Link href="/dashboard/chats" className="text-sm text-blue-600 dark:text-blue-400 underline">
             ← Volver
           </Link>
-          <h1 className="text-lg font-semibold">{title}</h1>
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h1>
         </div>
-        <div className="text-xs text-gray-500">{connected ? "Conectado" : "Reconectando..."}</div>
+        <div className="text-xs text-gray-500 dark:text-gray-400">{connected ? "Conectado" : "Reconectando..."}</div>
       </div>
 
       {/* Mensajes */}
-      <div ref={listRef} className="flex-1 space-y-2 overflow-auto p-4">
+      <div ref={listRef} className="flex-1 space-y-2 overflow-auto p-4 bg-white dark:bg-gray-800">
         {/* Cargar más */}
         {nextCursor && (
           <div className="mb-2 flex justify-center">
             <button
-              className="rounded bg-gray-100 px-3 py-1.5 text-sm hover:bg-gray-200"
+              className="rounded bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-sm hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100"
               onClick={handleLoadMore}
             >
               Cargar mensajes anteriores
@@ -242,36 +251,38 @@ export default function ChatDetailPage({ params }: PageProps) {
             <div
               key={m.id}
               className={`max-w-[80%] rounded px-3 py-2 ${
-                mine ? "ml-auto bg-blue-50" : "bg-gray-100"
+                mine 
+                  ? "ml-auto bg-blue-50 dark:bg-blue-900/30 text-gray-900 dark:text-gray-100" 
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               }`}
             >
-              {!mine && <div className="text-xs text-gray-500">{m.sender?.username}</div>}
+              {!mine && <div className="text-xs text-gray-500 dark:text-gray-400">{m.sender?.username}</div>}
               <div>{m.content}</div>
               {/* ✓✓ en 1:1 si el backend devuelve seen_by_other */}
               {typeof m.seen_by_other === "boolean" && mine && (
-                <div className="mt-1 text-[10px] text-gray-400">{m.seen_by_other ? "Visto ✓✓" : "Enviado"}</div>
+                <div className="mt-1 text-[10px] text-gray-400 dark:text-gray-500">{m.seen_by_other ? "Visto ✓✓" : "Enviado"}</div>
               )}
             </div>
           );
         })}
       </div>
 
-      {/* Typing indicator */}
-      {typingIds.length > 0 && (
-        <div className="px-4 pb-2 text-xs text-gray-500">Escribiendo…</div>
+      {/* Typing indicator - solo mostrar si NO es el usuario actual escribiendo */}
+      {typingIds.filter(id => id !== user?.id && id !== 0).length > 0 && (
+        <div className="px-4 pb-2 text-xs text-gray-500 dark:text-gray-400">Escribiendo…</div>
       )}
 
       {/* Input */}
-      <div className="flex items-center gap-2 border-t p-3">
+      <div className="flex items-center gap-2 border-t border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-900">
         <textarea
           ref={inputRef}
           value={text}
           onChange={(e) => {
             setText(e.target.value);
-            if (e.target.value.trim()) {
-              sendTypingStart();
-            } else {
-              sendTypingStop();
+            if (e.target.value.trim() && user?.id) {
+              sendTypingStart(user.id);
+            } else if (user?.id) {
+              sendTypingStop(user.id);
             }
           }}
           onFocus={() => sendRead()}
@@ -283,11 +294,11 @@ export default function ChatDetailPage({ params }: PageProps) {
           }}
           rows={1}
           placeholder="Escribe un mensaje…"
-          className="flex-1 resize-none rounded border px-3 py-2"
+          className="flex-1 resize-none rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
         />
         <button
           onClick={handleSend}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
         >
           Enviar
         </button>

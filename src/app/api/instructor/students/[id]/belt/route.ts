@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/server/middleware/auth';
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 // PATCH - Actualizar cinturón de un alumno (solo INSTRUCTOR/ADMIN)
 export async function PATCH(req: NextRequest, { params }: Params) {
@@ -19,7 +19,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   try {
-    const studentId = parseInt(params.id);
+    const resolvedParams = await params;
+    const studentId = parseInt(resolvedParams.id);
     if (isNaN(studentId)) {
       return NextResponse.json(
         { error: 'ID de estudiante inválido' },

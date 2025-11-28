@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Friends } from "@/lib/friends";
 import API from "@/lib/api";
@@ -26,7 +26,7 @@ export default function CreateGroupPage() {
   const [error, setError] = useState("");
 
   // Cargar amigos al montar
-  useState(() => {
+  useEffect(() => {
     const loadFriends = async () => {
       try {
         const res = await Friends.list({ page_size: 100 });
@@ -40,7 +40,7 @@ export default function CreateGroupPage() {
       }
     };
     loadFriends();
-  });
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -115,18 +115,18 @@ export default function CreateGroupPage() {
       <div className="mb-6">
         <button
           onClick={() => router.back()}
-          className="text-blue-600 hover:text-blue-700 font-medium"
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-500 font-medium"
         >
           ← Volver
         </button>
       </div>
 
-      <h1 className="text-2xl font-bold mb-6">Crear Grupo</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Crear Grupo</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Nombre del grupo */}
         <div>
-          <label htmlFor="groupName" className="block text-sm font-medium mb-2">
+          <label htmlFor="groupName" className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
             Nombre del grupo *
           </label>
           <input
@@ -135,14 +135,14 @@ export default function CreateGroupPage() {
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
             placeholder="Ej: Equipo de competencia"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             maxLength={50}
           />
         </div>
 
         {/* Imagen del grupo */}
         <div>
-          <label htmlFor="groupImage" className="block text-sm font-medium mb-2">
+          <label htmlFor="groupImage" className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
             Imagen del grupo (opcional)
           </label>
           <div className="flex items-center gap-4">
@@ -150,7 +150,7 @@ export default function CreateGroupPage() {
               <img
                 src={groupImagePreview}
                 alt="Preview"
-                className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+                className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
               />
             )}
             <div className="flex-1">
@@ -159,9 +159,9 @@ export default function CreateGroupPage() {
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Máximo 5MB. Formatos: JPG, PNG, GIF
               </p>
             </div>
@@ -170,21 +170,21 @@ export default function CreateGroupPage() {
 
         {/* Seleccionar amigos */}
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
             Seleccionar participantes * (mínimo 2)
           </label>
           {loadingFriends ? (
-            <div className="text-center py-4 text-gray-500">Cargando amigos...</div>
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400">Cargando amigos...</div>
           ) : friends.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400">
               No tienes amigos todavía. Añade amigos para crear grupos.
             </div>
           ) : (
-            <div className="border border-gray-300 rounded-lg max-h-80 overflow-y-auto">
+            <div className="border border-gray-300 dark:border-gray-600 rounded-lg max-h-80 overflow-y-auto bg-white dark:bg-gray-800">
               {friends.map((f) => (
                 <label
                   key={f.id}
-                  className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                  className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-200 dark:border-gray-700 last:border-b-0"
                 >
                   <input
                     type="checkbox"
@@ -192,19 +192,19 @@ export default function CreateGroupPage() {
                     onChange={() => toggleFriend(f.friend.id)}
                     className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                   />
-                  <span className="font-medium">{f.friend.username}</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{f.friend.username}</span>
                 </label>
               ))}
             </div>
           )}
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
             Seleccionados: {selectedFriends.length}
           </p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
             {error}
           </div>
         )}
@@ -214,14 +214,14 @@ export default function CreateGroupPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-gray-900 dark:text-white"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={loading || selectedFriends.length < 2}
-            className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-4 py-3 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Creando..." : "Crear Grupo"}
           </button>

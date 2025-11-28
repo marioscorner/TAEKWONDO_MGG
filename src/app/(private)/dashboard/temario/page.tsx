@@ -198,7 +198,7 @@ export default function TemarioPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="text-center">Cargando temario...</div>
+        <div className="text-center text-gray-900 dark:text-white">Cargando temario...</div>
       </div>
     );
   }
@@ -213,22 +213,22 @@ export default function TemarioPage() {
       <div className="mb-8">
         <Link
           href="/dashboard"
-          className="text-blue-600 hover:text-blue-700 font-medium mb-4 inline-block"
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-500 font-medium mb-4 inline-block"
         >
           ← Volver al Dashboard
         </Link>
-        <h1 className="text-4xl font-bold mb-2">🥋 Temario de Taekwondo</h1>
-        <p className="text-gray-600">
+        <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">🥋 Temario de Taekwondo</h1>
+        <p className="text-gray-600 dark:text-gray-400">
           Contenido específico para tu nivel actual
         </p>
       </div>
 
       {/* Cinturón actual */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-8 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">Tu Cinturón Actual</h2>
-            <p className="text-gray-600 mb-4">
+            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Tu Cinturón Actual</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               {profile?.firstName} {profile?.lastName || user?.username}
             </p>
           </div>
@@ -241,23 +241,23 @@ export default function TemarioPage() {
       </div>
 
       {/* Temario para tu nivel */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8">
-        <h2 className="text-2xl font-bold mb-6">📚 Contenido para Cinturón {userBelt}</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-8 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">📚 Contenido para Cinturón {userBelt}</h2>
         <div className="space-y-4">
           {temarioItems.map((item, index) => (
             <div
               key={index}
-              className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors"
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-500 dark:hover:border-blue-400 transition-colors bg-white dark:bg-gray-700/50"
             >
-              <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-              <p className="text-gray-600 mb-3">{item.description}</p>
+              <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">{item.title}</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-3">{item.description}</p>
               <div className="flex gap-2">
                 {item.videoUrl && (
                   <a
                     href={item.videoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
+                    className="px-3 py-1 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white text-sm rounded"
                   >
                     📹 Ver Video
                   </a>
@@ -267,13 +267,13 @@ export default function TemarioPage() {
                     href={item.pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded"
+                    className="px-3 py-1 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white text-sm rounded"
                   >
                     📄 Descargar PDF
                   </a>
                 )}
                 {!item.videoUrl && !item.pdfUrl && (
-                  <span className="text-sm text-gray-500 italic">
+                  <span className="text-sm text-gray-500 dark:text-gray-400 italic">
                     Contenido disponible en clases presenciales
                   </span>
                 )}
@@ -284,8 +284,8 @@ export default function TemarioPage() {
       </div>
 
       {/* Progreso general */}
-      <div className="bg-white rounded-xl shadow p-6">
-        <h2 className="text-2xl font-bold mb-6">🎯 Tu Progreso</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">🎯 Tu Progreso</h2>
         <div className="space-y-3">
           {BELTS.map((belt, index) => {
             const isPassed = index < userLevel;
@@ -296,19 +296,19 @@ export default function TemarioPage() {
               <div
                 key={belt}
                 className={`flex items-center gap-4 p-3 rounded-lg ${
-                  isCurrent ? 'bg-blue-50 border-2 border-blue-500' :
-                  isPassed ? 'bg-green-50 border border-green-200' :
-                  isNext ? 'bg-yellow-50 border border-yellow-200' :
-                  'bg-gray-50 border border-gray-200'
+                  isCurrent ? 'bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 dark:border-blue-400' :
+                  isPassed ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' :
+                  isNext ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' :
+                  'bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600'
                 }`}
               >
                 <span className={`px-4 py-2 rounded text-sm font-bold ${getBeltBadgeClass(belt)}`}>
                   {belt}
                 </span>
                 <div className="flex-1">
-                  {isCurrent && <span className="text-blue-600 font-semibold">← Tu nivel actual</span>}
-                  {isPassed && <span className="text-green-600">✓ Completado</span>}
-                  {isNext && <span className="text-yellow-600">→ Próximo objetivo</span>}
+                  {isCurrent && <span className="text-blue-600 dark:text-blue-400 font-semibold">← Tu nivel actual</span>}
+                  {isPassed && <span className="text-green-600 dark:text-green-400">✓ Completado</span>}
+                  {isNext && <span className="text-yellow-600 dark:text-yellow-400">→ Próximo objetivo</span>}
                 </div>
               </div>
             );
@@ -318,8 +318,8 @@ export default function TemarioPage() {
 
       {/* Nota para alumnos */}
       {user?.role === 'ALUMNO' && (
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
+        <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <p className="text-sm text-blue-800 dark:text-blue-300">
             <strong>Nota:</strong> Tu instructor actualizará tu cinturón cuando completes todos los requisitos y superes el examen correspondiente.
           </p>
         </div>

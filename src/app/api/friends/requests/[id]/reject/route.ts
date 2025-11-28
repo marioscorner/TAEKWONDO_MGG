@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/server/middleware/auth';
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 // POST - Rechazar solicitud de amistad
 export async function POST(req: NextRequest, { params }: Params) {
@@ -11,7 +11,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (user instanceof NextResponse) return user;
 
   try {
-    const requestId = parseInt(params.id);
+    const resolvedParams = await params;
+    const requestId = parseInt(resolvedParams.id);
 
     if (isNaN(requestId)) {
       return NextResponse.json(

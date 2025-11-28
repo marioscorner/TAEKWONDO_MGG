@@ -125,15 +125,15 @@ export default function FriendsPage() {
     <div className="px-6 sm:px-8">
       <div className="w-full max-w-6xl mx-auto flex flex-col gap-8">
         {/* Buscador de usuarios */}
-        <section className="bg-[var(--card)] rounded-2xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">Buscar usuarios</h2>
+        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Buscar usuarios</h2>
           <div className="relative">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Busca por nombre de usuario o email..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             {searching && (
               <div className="absolute right-3 top-3">
@@ -146,16 +146,16 @@ export default function FriendsPage() {
           {showResults && (
             <div className="mt-4 space-y-3">
               {searchResults.length === 0 ? (
-                <div className="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">
+                <div className="p-4 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   No se encontraron usuarios
                 </div>
               ) : (
                 searchResults.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between bg-gray-800/20 dark:bg-white/5 rounded-xl p-4">
+                  <div key={user.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
                     <div>
-                      <div className="text-sm font-semibold">{user.username}</div>
+                      <div className="text-sm font-semibold text-gray-900 dark:text-white">{user.username}</div>
                       {(user.firstName || user.lastName) && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           {user.firstName} {user.lastName}
                         </div>
                       )}
@@ -169,7 +169,7 @@ export default function FriendsPage() {
                     </div>
                     <button
                       onClick={() => sendRequest(user.id)}
-                      className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                     >
                       Enviar solicitud
                     </button>
@@ -181,34 +181,34 @@ export default function FriendsPage() {
         </section>
 
         {/* Lista de amigos y solicitudes */}
-        <section className="bg-[var(--card)] rounded-2xl shadow-lg p-6">
-          <h1 className="text-3xl font-bold mb-2">Mis Amigos</h1>
-          <p className="text-sm text-gray-400 mb-6">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Mis Amigos</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
             Gestiona solicitudes y consulta tu lista de amigos.
           </p>
 
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h2 className="text-xl font-semibold mb-3">Solicitudes</h2>
+              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Solicitudes</h2>
               <div className="space-y-3">
-                {loading && <p className="text-sm text-gray-400">Cargando…</p>}
+                {loading && <p className="text-sm text-gray-600 dark:text-gray-400">Cargando…</p>}
                 {!loading && requests.length === 0 && (
-                  <p className="text-sm text-gray-400">No hay solicitudes pendientes.</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">No hay solicitudes pendientes.</p>
                 )}
                 {requests.map((req) => (
-                  <div key={req.id} className="flex items-center justify-between bg-gray-800/20 dark:bg-white/5 rounded-xl p-4">
+                  <div key={req.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
                     <div className="text-sm">
-                      <span className="font-semibold">{req.from_user?.username}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{req.from_user?.username}</span>
                     </div>
                     <div className="flex gap-2">
                       <button 
-                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors" 
+                        className="px-3 py-1.5 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white text-sm rounded-lg transition-colors" 
                         onClick={() => act(req.id, "accept")}
                       >
                         ✓ Aceptar
                       </button>
                       <button 
-                        className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors" 
+                        className="px-3 py-1.5 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white text-sm rounded-lg transition-colors" 
                         onClick={() => act(req.id, "reject")}
                       >
                         ✗ Rechazar
@@ -220,7 +220,7 @@ export default function FriendsPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold mb-3">Tu lista</h2>
+              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Tu lista</h2>
               
               {/* Filtro de amigos */}
               <input
@@ -228,12 +228,12 @@ export default function FriendsPage() {
                 value={friendFilter}
                 onChange={(e) => setFriendFilter(e.target.value)}
                 placeholder="Buscar en tus amigos..."
-                className="w-full px-3 py-2 mb-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 mb-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
               
-              {loading && <p className="text-sm text-gray-400">Cargando…</p>}
+              {loading && <p className="text-sm text-gray-600 dark:text-gray-400">Cargando…</p>}
               {!loading && friends.length === 0 && (
-                <p className="text-sm text-gray-400">Aún no tienes amigos.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Aún no tienes amigos.</p>
               )}
               <div className="space-y-3">
                 {friends
@@ -250,8 +250,8 @@ export default function FriendsPage() {
                     const friendUsername = f.username || f.friend?.username;
                     const friendId = f.friend?.id || f.id;
                     return (
-                      <div key={f.id} className="flex items-center justify-between bg-gray-800/20 dark:bg-white/5 rounded-xl p-4">
-                        <div className="font-medium text-sm">{friendUsername}</div>
+                      <div key={f.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                        <div className="font-medium text-sm text-gray-900 dark:text-white">{friendUsername}</div>
                         <div className="flex gap-2">
                           <button
                             onClick={async () => {
@@ -267,7 +267,7 @@ export default function FriendsPage() {
                                 alert('Error al crear chat');
                               }
                             }}
-                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-colors"
+                            className="px-3 py-1.5 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white text-xs rounded-lg transition-colors"
                           >
                             💬 Chat
                           </button>
@@ -282,7 +282,7 @@ export default function FriendsPage() {
                                 }
                               }
                             }}
-                            className="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded-lg transition-colors"
+                            className="px-3 py-1.5 bg-orange-600 dark:bg-orange-500 hover:bg-orange-700 dark:hover:bg-orange-600 text-white text-xs rounded-lg transition-colors"
                           >
                             Eliminar
                           </button>
@@ -297,7 +297,7 @@ export default function FriendsPage() {
                                 }
                               }
                             }}
-                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors"
+                            className="px-3 py-1.5 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white text-xs rounded-lg transition-colors"
                           >
                             Bloquear
                           </button>

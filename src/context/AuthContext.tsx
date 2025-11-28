@@ -40,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (USE_MOCK) {
           const raw = localStorage.getItem("mock_user");
           setUser(raw ? JSON.parse(raw) : null);
+          setLoading(false);
           return;
         }
 

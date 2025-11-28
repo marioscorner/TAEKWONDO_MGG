@@ -126,7 +126,7 @@ export function useChatSocket(conversationId: number | null) {
     }
   };
 
-  const sendTypingStart = () => {
+  const sendTypingStart = (userId: number) => {
     // Simular typing indicator localmente
     // En producción, esto se enviaría al servidor
     if (typingTimeoutRef.current) {
@@ -135,16 +135,16 @@ export function useChatSocket(conversationId: number | null) {
 
     messageHandlerRef.current?.({
       event: "typing.start",
-      by: 0, // ID del usuario actual
+      by: userId, // ID del usuario que está escribiendo
     });
 
     // Auto-stop después de 3 segundos
     typingTimeoutRef.current = setTimeout(() => {
-      sendTypingStop();
+      sendTypingStop(userId);
     }, 3000);
   };
 
-  const sendTypingStop = () => {
+  const sendTypingStop = (userId: number) => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
@@ -152,7 +152,7 @@ export function useChatSocket(conversationId: number | null) {
 
     messageHandlerRef.current?.({
       event: "typing.stop",
-      by: 0,
+      by: userId,
     });
   };
 
@@ -165,7 +165,7 @@ export function useChatSocket(conversationId: number | null) {
     sendMessage, 
     sendRead, 
     setOnMessage, 
-    sendTypingStart, 
-    sendTypingStop 
+    sendTypingStart: (userId: number) => sendTypingStart(userId), 
+    sendTypingStop: (userId: number) => sendTypingStop(userId)
   };
 }

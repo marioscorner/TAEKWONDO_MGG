@@ -110,7 +110,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="text-center">Cargando perfil...</div>
+        <div className="text-center text-gray-900 dark:text-gray-100">Cargando perfil...</div>
       </div>
     );
   }
@@ -118,47 +118,47 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <div className="p-6">
-        <div className="text-center text-red-600">Error al cargar perfil</div>
+        <div className="text-center text-red-600 dark:text-red-400">Error al cargar perfil</div>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Mi Perfil</h1>
+      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Mi Perfil</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Columna izquierda: Avatar */}
         <div className="md:col-span-1">
-          <div className="bg-white rounded-xl shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex flex-col items-center">
               {avatarPreview ? (
                 <img
                   src={avatarPreview}
                   alt="Avatar"
-                  className="w-40 h-40 rounded-full object-cover border-4 border-blue-500 mb-4"
+                  className="w-40 h-40 rounded-full object-cover border-4 border-blue-500 dark:border-blue-400 mb-4"
                 />
               ) : (
-                <div className="w-40 h-40 rounded-full bg-gray-200 flex items-center justify-center text-6xl mb-4">
+                <div className="w-40 h-40 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-6xl mb-4">
                   👤
                 </div>
               )}
               
-              <h2 className="text-xl font-bold mb-1">{profile.username}</h2>
-              <p className="text-sm text-gray-600 mb-4">{profile.email}</p>
+              <h2 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">{profile.username}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{profile.email}</p>
               
               <div className="w-full space-y-3">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleAvatarChange}
-                  className="w-full text-sm"
+                  className="w-full text-sm text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
                 />
                 {avatarFile && (
                   <button
                     onClick={handleUploadAvatar}
                     disabled={uploadingAvatar}
-                    className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50"
+                    className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
                   >
                     {uploadingAvatar ? "Subiendo..." : "Subir Avatar"}
                   </button>
@@ -168,9 +168,9 @@ export default function ProfilePage() {
               <div className="mt-4 w-full">
                 <div className="text-center">
                   <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                    profile.role === 'ADMIN' ? 'bg-red-100 text-red-800' :
-                    profile.role === 'INSTRUCTOR' ? 'bg-purple-100 text-purple-800' :
-                    'bg-blue-100 text-blue-800'
+                    profile.role === 'ADMIN' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' :
+                    profile.role === 'INSTRUCTOR' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' :
+                    'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
                   }`}>
                     {profile.role === 'ADMIN' ? '👑 Admin' :
                      profile.role === 'INSTRUCTOR' ? '🥋 Instructor' :
@@ -184,13 +184,13 @@ export default function ProfilePage() {
 
         {/* Columna derecha: Información */}
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Información Personal</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Información Personal</h2>
               {!editing && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium"
                 >
                   ✏️ Editar
                 </button>
@@ -200,39 +200,39 @@ export default function ProfilePage() {
             {editing ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Nombre</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">Nombre</label>
                   <input
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Apellidos</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">Apellidos</label>
                   <input
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Teléfono</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">Teléfono</label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
                 {(profile.role === 'INSTRUCTOR' || profile.role === 'ADMIN') && (
                   <div>
-                    <label className="block text-sm font-medium mb-2">Cinturón</label>
+                    <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">Cinturón</label>
                     <select
                       value={formData.belt}
                       onChange={(e) => setFormData({ ...formData, belt: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="">Selecciona cinturón</option>
                       <option value="Blanco">Blanco</option>
@@ -248,7 +248,7 @@ export default function ProfilePage() {
                       <option value="Rojo">Rojo</option>
                       <option value="Negro">Negro</option>
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Solo instructores pueden editar cinturones
                     </p>
                   </div>
@@ -265,13 +265,13 @@ export default function ProfilePage() {
                         belt: profile.belt || "",
                       });
                     }}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-gray-900 dark:text-white"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleSave}
-                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-lg font-medium"
                   >
                     💾 Guardar
                   </button>
@@ -280,23 +280,23 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Nombre</label>
-                  <p className="text-lg">{profile.firstName || "No especificado"}</p>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Nombre</label>
+                  <p className="text-lg text-gray-900 dark:text-white">{profile.firstName || "No especificado"}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Apellidos</label>
-                  <p className="text-lg">{profile.lastName || "No especificado"}</p>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Apellidos</label>
+                  <p className="text-lg text-gray-900 dark:text-white">{profile.lastName || "No especificado"}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Teléfono</label>
-                  <p className="text-lg">{profile.phone || "No especificado"}</p>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Teléfono</label>
+                  <p className="text-lg text-gray-900 dark:text-white">{profile.phone || "No especificado"}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Cinturón</label>
-                  <p className="text-lg">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Cinturón</label>
+                  <p className="text-lg text-gray-900 dark:text-white">
                     {profile.belt || "No especificado"}
                     {profile.role === 'ALUMNO' && (
-                      <span className="text-xs text-gray-500 ml-2">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
                         (Solo tu instructor puede modificarlo)
                       </span>
                     )}
@@ -307,9 +307,9 @@ export default function ProfilePage() {
           </div>
 
           {/* Zona peligrosa */}
-          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6">
-            <h2 className="text-xl font-bold text-red-600 mb-4">⚠️ Zona Peligrosa</h2>
-            <p className="text-gray-700 mb-4">
+          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl p-6">
+            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4">⚠️ Zona Peligrosa</h2>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
               Una vez elimines tu cuenta, no hay vuelta atrás. Todos tus datos se eliminarán permanentemente.
             </p>
             <DeleteAccountButton />

@@ -82,18 +82,6 @@ export default function ChatsPage() {
     };
   }, [loadConversations]);
 
-  const emptyState = useMemo(
-    () =>
-      !loading &&
-      !error &&
-      convs.length === 0 && (
-        <div className="p-8 text-center text-gray-500">
-          <p className="mb-2">Aún no tienes conversaciones.</p>
-          <p className="text-sm">Añade amigos para comenzar a chatear.</p>
-        </div>
-      ),
-    [loading, error, convs.length]
-  );
 
   // Filtrar amigos según búsqueda
   const filteredFriends = useMemo(() => {
@@ -119,11 +107,11 @@ export default function ChatsPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">Conversaciones</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Conversaciones</h1>
         <button
           onClick={loadConversations}
           disabled={loading}
-          className="px-3 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+          className="px-3 py-1 text-sm rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 text-gray-900 dark:text-white"
         >
           {loading ? "Cargando..." : "Actualizar"}
         </button>
@@ -142,7 +130,7 @@ export default function ChatsPage() {
             onFocus={() => setShowFriendResults(friendSearch.length >= 2)}
             onBlur={() => setTimeout(() => setShowFriendResults(false), 200)}
             placeholder="Buscar amigo para chatear..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
           {showFriendResults && filteredFriends.length > 0 && (
             <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
@@ -154,23 +142,23 @@ export default function ChatsPage() {
                     setFriendSearch("");
                     setShowFriendResults(false);
                   }}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between border-b last:border-b-0"
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 last:border-b-0 text-gray-900 dark:text-white"
                 >
                   <span className="font-medium">{f.friend.username}</span>
-                  <span className="text-sm text-blue-600">💬 Abrir chat</span>
+                  <span className="text-sm text-blue-600 dark:text-blue-400">💬 Abrir chat</span>
                 </button>
               ))}
             </div>
           )}
           {showFriendResults && filteredFriends.length === 0 && friendSearch.length >= 2 && (
-            <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 text-center text-gray-500">
+            <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 text-center text-gray-500 dark:text-gray-400">
               No se encontraron amigos
             </div>
           )}
         </div>
         <Link
           href="/dashboard/chats/create-group"
-          className="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium whitespace-nowrap transition-colors"
+          className="px-4 py-3 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-lg font-medium whitespace-nowrap transition-colors"
         >
           👥 Crear Grupo
         </Link>
@@ -179,18 +167,23 @@ export default function ChatsPage() {
       {loading && (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-14 animate-pulse rounded bg-gray-100" />
+            <div key={i} className="h-14 animate-pulse rounded bg-gray-100 dark:bg-gray-700" />
           ))}
         </div>
       )}
 
       {error && (
-        <div className="rounded border border-red-200 bg-red-50 p-4 text-red-700">
+        <div className="rounded border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
 
-      {emptyState}
+      {!loading && !error && convs.length === 0 && (
+        <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+          <p className="mb-2">Aún no tienes conversaciones.</p>
+          <p className="text-sm">Añade amigos para comenzar a chatear.</p>
+        </div>
+      )}
 
       {!loading && !error && convs.length > 0 && (
         <div className="space-y-2">
@@ -206,24 +199,24 @@ export default function ChatsPage() {
               <Link
                 key={c.id}
                 href={`/dashboard/chats/${c.id}`}
-                className="flex items-center justify-between gap-4 rounded border p-3 hover:bg-gray-50"
+                className="flex items-center justify-between gap-4 rounded border border-gray-200 dark:border-gray-700 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800 transition-colors"
               >
-                <div className="min-w-0">
-                  <div className="truncate font-medium">{title}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium text-gray-900 dark:text-white">{title}</div>
                   {c.last_message && (
-                    <div className="truncate text-sm text-gray-500">
+                    <div className="truncate text-sm text-gray-500 dark:text-gray-400">
                       {c.last_message.sender.username}: {c.last_message.content}
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-shrink-0">
                   {c.unread_count > 0 && (
-                    <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
+                    <span className="rounded-full bg-blue-600 dark:bg-blue-500 px-2 py-0.5 text-xs font-semibold text-white">
                       {c.unread_count}
                     </span>
                   )}
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                     {c.last_message
                       ? formatTimeAgo(new Date(c.last_message.created_at))
                       : ""}

@@ -5,7 +5,7 @@ import { requireAuth } from '@/server/middleware/auth';
 import { sendMessageSchema } from '@/lib/validations';
 import { ZodError } from 'zod';
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 // GET - Listar mensajes de una conversación
 export async function GET(req: NextRequest, { params }: Params) {
@@ -13,7 +13,8 @@ export async function GET(req: NextRequest, { params }: Params) {
   if (user instanceof NextResponse) return user;
 
   try {
-    const conversationId = parseInt(params.id);
+    const resolvedParams = await params;
+    const conversationId = parseInt(resolvedParams.id);
 
     if (isNaN(conversationId)) {
       return NextResponse.json(
@@ -97,7 +98,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (user instanceof NextResponse) return user;
 
   try {
-    const conversationId = parseInt(params.id);
+    const resolvedParams = await params;
+    const conversationId = parseInt(resolvedParams.id);
 
     if (isNaN(conversationId)) {
       return NextResponse.json(

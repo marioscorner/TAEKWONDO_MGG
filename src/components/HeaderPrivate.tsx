@@ -2,12 +2,14 @@
 "use client";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/context/ThemeContext";
 import { getBeltTextColor, isFullBelt } from "@/lib/belt-colors";
 import { useEffect, useState } from "react";
 import API from "@/lib/api";
 
 export default function HeaderPrivate() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [userBelt, setUserBelt] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,6 +51,15 @@ export default function HeaderPrivate() {
           <li><Link href="/dashboard/chats" className="hover:text-blue-400 transition-colors">Chats</Link></li>
           <li><Link href="/dashboard/friends" className="hover:text-blue-400 transition-colors">Amigos</Link></li>
           <li><Link href="/dashboard/profile" className="hover:text-blue-400 transition-colors">Perfil</Link></li>
+          <li>
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded hover:bg-gray-700 transition-colors"
+              title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+          </li>
           {user && (
             <li>
               <button 

@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
         password: hashedPassword,
         firstName: data.firstName,
         lastName: data.lastName,
+        belt: 'Blanco', // Cinturón blanco por defecto
       },
       select: {
         id: true,

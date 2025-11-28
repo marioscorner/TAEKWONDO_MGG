@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/server/middleware/auth';
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 // DELETE - Desbloquear usuario
 export async function DELETE(req: NextRequest, { params }: Params) {
@@ -11,7 +11,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   if (user instanceof NextResponse) return user;
 
   try {
-    const blockedId = parseInt(params.id);
+    const resolvedParams = await params;
+    const blockedId = parseInt(resolvedParams.id);
 
     if (isNaN(blockedId)) {
       return NextResponse.json(
