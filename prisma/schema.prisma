@@ -28,6 +28,7 @@ model User {
   phone         String?
   birthDate     DateTime?
   belt          String?   // Cinturón actual
+  avatarUrl     String?   // URL del avatar del usuario
   
   // Relations
   conversations      ConversationParticipant[]
@@ -72,6 +73,7 @@ model Conversation {
   id          Int       @id @default(autoincrement())
   name        String?
   isGroup     Boolean   @default(false)
+  groupImageUrl String? // URL de la imagen del grupo
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   

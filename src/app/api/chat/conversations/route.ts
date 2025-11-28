@@ -72,6 +72,7 @@ export async function GET(req: NextRequest) {
           id: conv.id,
           name: conv.name,
           is_group: conv.isGroup,
+          group_image_url: conv.groupImageUrl,
           created_at: conv.createdAt.toISOString(),
           participants: conv.participants.map((p) => ({
             user: p.user,
@@ -161,6 +162,7 @@ export async function POST(req: NextRequest) {
       data: {
         name: data.name,
         isGroup: data.is_group,
+        groupImageUrl: body.group_image_url || null,
         participants: {
           create: userIds.map((id) => ({
             userId: id,

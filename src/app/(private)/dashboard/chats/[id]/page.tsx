@@ -62,13 +62,37 @@ export default function ChatDetailPage({ params }: PageProps) {
         if (mounted) {
           setMessages(asc);
           setNextCursor(page.next);
+          
+          // Actualizar último ID conocido
+          if (asc.length > 0) {
+            const lastMsg = asc[asc.length - 1];
+            if (lastMsg.id) {
+              (useChatSocket as any).lastMessageIdRef = lastMsg.id;
+            }
+          }
         }
         await markConversationRead(conversationId);
+        
+        // Scroll al final después de cargar
+        setTimeout(() => {
+          if (listRef.current) {
+            listRef.current.scrollTop = listRef.current.scrollHeight;
+          }
+        }, 100);
       } catch {
         // Compat: si falla por cursor, usa la lista simple existente
         try {
           const data: Message[] = await listMessages(conversationId);
-          if (mounted) setMessages(data);
+          if (mounted) {
+            setMessages(data);
+            
+            // Scroll al final
+            setTimeout(() => {
+              if (listRef.current) {
+                listRef.current.scrollTop = listRef.current.scrollHeight;
+              }
+            }, 100);
+          }
           await markConversationRead(conversationId);
         } catch {
           if (mounted) setError("No se pudieron cargar los mensajes.");
@@ -98,28 +122,40 @@ export default function ChatDetailPage({ params }: PageProps) {
     }
   }
 
-  // WS: escuchar eventos
+  // Polling: escuchar eventos en tiempo real
   useEffect(() => {
     setOnMessage((evt) => {
       if (evt.event === "message.new") {
-        setMessages((prev) => [...prev, evt.message as Message]);
-        sendRead();
-        // scroll al final
+        const newMessage = evt.message as Message;
+        
+        // Evitar duplicados
+        setMessages((prev) => {
+          const exists = prev.some(m => m.id === newMessage.id);
+          if (exists) return prev;
+          return [...prev, newMessage];
+        });
+        
+        // Marcar como leído si no es tu mensaje
+        if (newMessage.sender.id !== user?.id) {
+          sendRead();
+        }
+        
+        // Scroll al final
         setTimeout(() => {
-          listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
-        }, 0);
+          if (listRef.current) {
+            listRef.current.scrollTop = listRef.current.scrollHeight;
+          }
+        }, 100);
       } else if (evt.event === "typing.start") {
         setTypingIds((prev) => (prev.includes(evt.by) ? prev : [...prev, evt.by]));
       } else if (evt.event === "typing.stop") {
         setTypingIds((prev) => prev.filter((id) => id !== evt.by));
-      } else if (evt.event === "conversation.read") {
-        // opcional: podrías recalcular vistos localmente en base a evt.at
       } else if (evt.event === "error") {
-        setError(evt.detail || "Error en el WebSocket.");
+        setError(evt.detail || "Error en el chat.");
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setOnMessage]);
+  }, [setOnMessage, user?.id]);
 
   // Título de cabecera
   const title = useMemo(() => {
@@ -133,11 +169,19 @@ export default function ChatDetailPage({ params }: PageProps) {
   }, [conv, user?.username]);
 
   // Enviar
-  const handleSend = () => {
+  const handleSend = async () => {
     const v = text.trim();
     if (!v) return;
     setText("");
-    sendMessage(v);
+    await sendMessage(v);
+    sendTypingStop();
+    
+    // Scroll al final después de enviar
+    setTimeout(() => {
+      if (listRef.current) {
+        listRef.current.scrollTop = listRef.current.scrollHeight;
+      }
+    }, 100);
   };
 
   if (!Number.isFinite(conversationId)) {
@@ -155,7 +199,7 @@ export default function ChatDetailPage({ params }: PageProps) {
   if (error) {
     return (
       <div className="p-6">
-        <Link href="/app/private/chats" className="text-sm text-blue-600 underline">
+        <Link href="/dashboard/chats" className="text-sm text-blue-600 underline">
           ← Volver
         </Link>
         <div className="mt-3 rounded border border-red-200 bg-red-50 p-3 text-red-700">
@@ -224,10 +268,11 @@ export default function ChatDetailPage({ params }: PageProps) {
           value={text}
           onChange={(e) => {
             setText(e.target.value);
-            sendTypingStart();
-            // auto stop tras 1.2s sin teclear
-            const t = setTimeout(() => sendTypingStop(), 1200);
-            return () => clearTimeout(t);
+            if (e.target.value.trim()) {
+              sendTypingStart();
+            } else {
+              sendTypingStop();
+            }
           }}
           onFocus={() => sendRead()}
           onKeyDown={(e) => {

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { sendMessage as sendMessageAPI, markConversationRead } from "@/lib/chat";
 
 type BaseMessage = {
   id: number;
@@ -16,61 +17,155 @@ type ChatEvent =
   | { event: "typing.stop"; by: number; at?: string }
   | { event: "error"; detail?: string };
 
+/**
+ * Hook para chat en tiempo real usando polling inteligente
+ * Más confiable que WebSocket para MVP y funciona sin servidor custom
+ */
 export function useChatSocket(conversationId: number | null) {
-  const [connected, setConnected] = useState(false);
-  const wsRef = useRef<WebSocket | null>(null);
+  const [connected, setConnected] = useState(true); // Siempre "conectado" con polling
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastMessageIdRef = useRef<number>(0);
+  const messageHandlerRef = useRef<((evt: ChatEvent) => void) | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    if (!conversationId) return;
-    const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
-    if (!token) return;
+  // Polling para nuevos mensajes
+  const pollMessages = useCallback(async () => {
+    if (!conversationId || !messageHandlerRef.current) return;
 
-    // TODO: Implementar WebSocket real cuando se necesite
-    // Por ahora, el chat funciona con polling/HTTP requests
-    // const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // const wsUrl = `${wsProtocol}//${window.location.host}/ws/chat/${conversationId}/?token=${token}`;
-    // const ws = new WebSocket(wsUrl);
-    // wsRef.current = ws;
+    try {
+      const response = await fetch(`/api/chat/conversations/${conversationId}/messages?page=1&page_size=50`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access")}`,
+        },
+      });
 
-    // ws.onopen = () => setConnected(true);
-    // ws.onclose = () => setConnected(false);
-    // ws.onerror = () => setConnected(false);
+      if (!response.ok) return;
 
-    // return () => {
-    //   ws.close();
-    //   wsRef.current = null;
-    // };
+      const data = await response.json();
+      const messages = data.results || [];
+
+      // Detectar nuevos mensajes
+      if (messages.length > 0) {
+        const latestMessage = messages[messages.length - 1];
+        
+        if (latestMessage.id > lastMessageIdRef.current) {
+          // Hay mensajes nuevos
+          const newMessages = messages.filter((m: BaseMessage) => m.id > lastMessageIdRef.current);
+          
+          newMessages.forEach((msg: BaseMessage) => {
+            messageHandlerRef.current?.({
+              event: "message.new",
+              message: msg,
+            });
+          });
+
+          lastMessageIdRef.current = latestMessage.id;
+        }
+      }
+    } catch (error) {
+      console.error("Error al hacer polling:", error);
+    }
   }, [conversationId]);
 
-  const sendMessage = (content: string) => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    wsRef.current.send(JSON.stringify({ action: "message", content }));
+  // Iniciar polling cuando hay conversación activa
+  useEffect(() => {
+    if (!conversationId) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
+    }
+
+    setConnected(true);
+    
+    // Poll cada 2 segundos cuando el chat está abierto
+    intervalRef.current = setInterval(pollMessages, 2000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [conversationId, pollMessages]);
+
+  const sendMessage = async (content: string) => {
+    if (!conversationId) return;
+
+    try {
+      const message = await sendMessageAPI(conversationId, content);
+      
+      // Actualizar el último ID conocido
+      if (message.id > lastMessageIdRef.current) {
+        lastMessageIdRef.current = message.id;
+      }
+
+      // Disparar evento inmediatamente para el mensaje propio
+      messageHandlerRef.current?.({
+        event: "message.new",
+        message: message as BaseMessage,
+      });
+
+      // Forzar un poll inmediato
+      setTimeout(pollMessages, 100);
+    } catch (error) {
+      messageHandlerRef.current?.({
+        event: "error",
+        detail: "Error al enviar mensaje",
+      });
+    }
   };
 
-  const sendRead = () => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    wsRef.current.send(JSON.stringify({ action: "read" }));
+  const sendRead = async () => {
+    if (!conversationId) return;
+    try {
+      await markConversationRead(conversationId);
+    } catch (error) {
+      console.error("Error al marcar como leído:", error);
+    }
   };
 
   const sendTypingStart = () => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    wsRef.current.send(JSON.stringify({ action: "typing.start" }));
+    // Simular typing indicator localmente
+    // En producción, esto se enviaría al servidor
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    messageHandlerRef.current?.({
+      event: "typing.start",
+      by: 0, // ID del usuario actual
+    });
+
+    // Auto-stop después de 3 segundos
+    typingTimeoutRef.current = setTimeout(() => {
+      sendTypingStop();
+    }, 3000);
   };
 
   const sendTypingStop = () => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    wsRef.current.send(JSON.stringify({ action: "typing.stop" }));
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+
+    messageHandlerRef.current?.({
+      event: "typing.stop",
+      by: 0,
+    });
   };
 
   const setOnMessage = (handler: (evt: ChatEvent) => void) => {
-    if (!wsRef.current) return;
-    wsRef.current.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data);
-        if (data?.event) handler(data as ChatEvent);
-      } catch {}
-    };
+    messageHandlerRef.current = handler;
   };
 
-  return { connected, sendMessage, sendRead, setOnMessage, sendTypingStart, sendTypingStop };
+  return { 
+    connected, 
+    sendMessage, 
+    sendRead, 
+    setOnMessage, 
+    sendTypingStart, 
+    sendTypingStop 
+  };
 }

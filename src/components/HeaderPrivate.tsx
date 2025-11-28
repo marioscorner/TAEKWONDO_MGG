@@ -2,22 +2,59 @@
 "use client";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { getBeltTextColor, isFullBelt } from "@/lib/belt-colors";
+import { useEffect, useState } from "react";
+import API from "@/lib/api";
 
 export default function HeaderPrivate() {
   const { user, logout } = useAuth();
+  const [userBelt, setUserBelt] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Cargar el cinturón del usuario desde el perfil
+    const loadUserBelt = async () => {
+      try {
+        const res = await API.get("/users/profile");
+        setUserBelt(res.data.belt);
+      } catch (error) {
+        console.error("Error al cargar cinturón:", error);
+      }
+    };
+    
+    if (user) {
+      loadUserBelt();
+    }
+  }, [user]);
+
+  // Obtener color del username según cinturón (solo si es cinturón completo)
+  const usernameColor = userBelt && isFullBelt(userBelt)
+    ? getBeltTextColor(userBelt)
+    : 'text-blue-400';
 
   return (
     <header className="border-b bg-gray-900 text-white shadow-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <div className="font-bold text-lg">Área privada 🥋</div>
+        {/* Saludo al usuario donde estaba "Área privada" */}
+        <div className="font-bold text-lg">
+          {user ? (
+            <span>Bienvenido, <span className={usernameColor}>{user.username}</span> 🥋</span>
+          ) : (
+            <span>Área privada 🥋</span>
+          )}
+        </div>
+        
+        {/* Menú de navegación */}
         <ul className="flex gap-4 text-sm font-medium items-center">
-          <li><Link href="/dashboard" className="hover:underline">Inicio</Link></li>
-          <li><Link href="/dashboard/docs" className="hover:underline">Documentos</Link></li>
-          <li><Link href="/dashboard/profile" className="hover:underline">Perfil</Link></li>
-          {user && <li className="opacity-80">Bienvenido, <span className="font-semibold">{user.username}</span></li>}
+          <li><Link href="/dashboard" className="hover:text-blue-400 transition-colors">Dashboard</Link></li>
+          <li><Link href="/dashboard/chats" className="hover:text-blue-400 transition-colors">Chats</Link></li>
+          <li><Link href="/dashboard/friends" className="hover:text-blue-400 transition-colors">Amigos</Link></li>
+          <li><Link href="/dashboard/profile" className="hover:text-blue-400 transition-colors">Perfil</Link></li>
           {user && (
             <li>
-              <button onClick={logout} className="bg-red-600 px-3 py-1 rounded hover:bg-red-700">
+              <button 
+                onClick={logout} 
+                className="bg-red-600 px-3 py-1.5 rounded hover:bg-red-700 transition-colors"
+              >
                 Cerrar sesión
               </button>
             </li>

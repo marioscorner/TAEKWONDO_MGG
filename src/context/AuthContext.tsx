@@ -125,3 +125,5 @@ export function useAuth(): AuthContextType {
   if (!ctx) throw new Error("useAuth debe usarse dentro de un AuthProvider");
   return ctx;
 }
+
+export { AuthContext };

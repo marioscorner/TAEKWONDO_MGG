@@ -91,7 +91,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 }
 
-// POST - Enviar mensaje
+// POST - Enviar mensaje (CON VALIDACIÓN DE AMISTAD)
 export async function POST(req: NextRequest, { params }: Params) {
   const user = await requireAuth(req);
   if (user instanceof NextResponse) return user;
@@ -107,18 +107,77 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     // Verificar que el usuario sea participante
-    const isParticipant = await prisma.conversationParticipant.findFirst({
+    const participant = await prisma.conversationParticipant.findFirst({
       where: {
         conversationId,
         userId: user.userId,
       },
     });
 
-    if (!isParticipant) {
+    if (!participant) {
       return NextResponse.json(
         { error: 'No eres participante de esta conversación' },
         { status: 403 }
       );
+    }
+
+    // Obtener la conversación para verificar si es 1:1
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        participants: {
+          where: {
+            userId: { not: user.userId }
+          },
+          select: {
+            userId: true
+          }
+        }
+      }
+    });
+
+    if (!conversation) {
+      return NextResponse.json(
+        { error: 'Conversación no encontrada' },
+        { status: 404 }
+      );
+    }
+
+    // Si es conversación 1:1, verificar amistad
+    if (!conversation.isGroup && conversation.participants.length > 0) {
+      const otherUserId = conversation.participants[0].userId;
+      
+      // Verificar que sean amigos
+      const friendship = await prisma.friendship.findFirst({
+        where: {
+          userId: user.userId,
+          friendId: otherUserId,
+        },
+      });
+
+      if (!friendship) {
+        return NextResponse.json(
+          { error: 'Solo puedes enviar mensajes a tus amigos' },
+          { status: 403 }
+        );
+      }
+
+      // Verificar que no esté bloqueado
+      const blocked = await prisma.blockedUser.findFirst({
+        where: {
+          OR: [
+            { blockerId: user.userId, blockedId: otherUserId },
+            { blockerId: otherUserId, blockedId: user.userId },
+          ],
+        },
+      });
+
+      if (blocked) {
+        return NextResponse.json(
+          { error: 'No puedes enviar mensajes a este usuario' },
+          { status: 403 }
+        );
+      }
     }
 
     const body = await req.json();
@@ -171,4 +230,3 @@ export async function POST(req: NextRequest, { params }: Params) {
     );
   }
 }
-

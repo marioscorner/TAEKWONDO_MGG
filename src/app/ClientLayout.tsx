@@ -1,22 +1,25 @@
-
 "use client";
 
 import { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import HeaderPublic from "@/components/HeaderPublic";
 import HeaderPrivate from "@/components/HeaderPrivate";
 import FooterPublic from "@/components/Footer";
 
-export default function ClientLayout({ children }: { children: ReactNode }) {
+function LayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isPrivate = pathname?.startsWith("/dashboard"); // URL real (los grupos de ruta NO salen en la URL)
+  const { user, loading } = useAuth();
+  
+  // Si está autenticado, siempre mostrar HeaderPrivate
+  // Si no está autenticado, mostrar HeaderPublic
+  const showPrivateHeader = !loading && user !== null;
 
   return (
-    <AuthProvider>
-      {/* Header fijo, escoge uno u otro */}
+    <>
+      {/* Header fijo basado en autenticación */}
       <div className="fixed top-0 left-0 right-0 z-50">
-        {isPrivate ? <HeaderPrivate /> : <HeaderPublic />}
+        {showPrivateHeader ? <HeaderPrivate /> : <HeaderPublic />}
       </div>
 
       {/* deja espacio para el header y el footer fijos */}
@@ -25,6 +28,14 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
       <div className="fixed bottom-0 left-0 right-0 z-50">
         <FooterPublic />
       </div>
+    </>
+  );
+}
+
+export default function ClientLayout({ children }: { children: ReactNode }) {
+  return (
+    <AuthProvider>
+      <LayoutContent>{children}</LayoutContent>
     </AuthProvider>
   );
 }
