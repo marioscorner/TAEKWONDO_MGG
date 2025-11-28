@@ -40,7 +40,7 @@ GRANT ALL PRIVILEGES ON DATABASE taekwondo_db TO tkd_user;
 ```bash
 # Clonar e instalar
 git clone <tu-repositorio>
-cd frontend-tkd
+cd TAEKWONDO_MGG
 npm install
 
 # Copiar variables de entorno

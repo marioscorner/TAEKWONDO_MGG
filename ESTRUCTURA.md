@@ -3,7 +3,7 @@
 ## 🎯 Estructura Actual
 
 ```
-frontend-tkd/
+TAEKWONDO_MGG/
 │
 ├── 📁 prisma/
 │   └── schema.prisma              # ✅ Schema de base de datos completo

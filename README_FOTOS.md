@@ -33,7 +33,7 @@ Añadir fotos de taekwondo y personales al carrusel de la página "Sobre mí".
 1. **Ubicación:** Carpeta `public/` en la raíz del proyecto
 
 ```
-frontend-tkd/
+TAEKWONDO_MGG/
   public/
     mario.jpeg              ← Ya existe
     tkd_main.jpg           ← Ya existe

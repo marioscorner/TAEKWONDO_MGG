@@ -264,7 +264,7 @@ git push origin main
 
 ```bash
 # Antes
-origin  https://github.com/mario/frontend-tkd.git
+origin  https://github.com/marioscorner/TAEKWONDO_MGG.git
 
 # Cambiar en GitHub a: "taekwondo-app"
 

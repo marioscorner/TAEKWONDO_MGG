@@ -31,7 +31,7 @@ Aplicación web full-stack para la escuela de Taekwondo de Mario Gutiérrez en M
 
 ```bash
 git clone <tu-repositorio>
-cd frontend-tkd
+cd TAEKWONDO_MGG
 ```
 
 ### 2. Instalar dependencias
@@ -94,7 +94,7 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 ## 📁 Estructura del Proyecto
 
 ```
-frontend-tkd/
+TAEKWONDO_MGG/
 ├── prisma/
 │   └── schema.prisma          # Schema de base de datos
 ├── src/
