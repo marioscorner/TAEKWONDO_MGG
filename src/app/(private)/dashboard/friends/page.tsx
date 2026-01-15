@@ -16,6 +16,7 @@ type Friend = {
   friend?: {
     id: number;
     username: string;
+    role: string;
   };
 };
 
@@ -249,9 +250,23 @@ export default function FriendsPage() {
                   .map((f) => {
                     const friendUsername = f.username || f.friend?.username;
                     const friendId = f.friend?.id || f.id;
+                    const friendRole = f.friend?.role;
+                    const isInstructorOrAdmin = friendRole === 'INSTRUCTOR' || friendRole === 'ADMIN';
+                    
                     return (
                       <div key={f.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
-                        <div className="font-medium text-sm text-gray-900 dark:text-white">{friendUsername}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium text-sm text-gray-900 dark:text-white">{friendUsername}</div>
+                          {isInstructorOrAdmin && (
+                            <span className={`px-2 py-0.5 text-xs font-semibold rounded ${
+                              friendRole === 'ADMIN' 
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+                            }`}>
+                              {friendRole === 'ADMIN' ? '👑 Admin' : '🥋 Instructor'}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex gap-2">
                           <button
                             onClick={async () => {
@@ -271,36 +286,48 @@ export default function FriendsPage() {
                           >
                             💬 Chat
                           </button>
-                          <button
-                            onClick={async () => {
-                              if (confirm(`¿Eliminar a ${friendUsername} de tus amigos?`)) {
-                                try {
-                                  await API.post(`/friends/unfriend/${friendId}`);
-                                  await reload();
-                                } catch (error) {
-                                  alert('Error al eliminar amigo');
-                                }
-                              }
-                            }}
-                            className="px-3 py-1.5 bg-orange-600 dark:bg-orange-500 hover:bg-orange-700 dark:hover:bg-orange-600 text-white text-xs rounded-lg transition-colors"
-                          >
-                            Eliminar
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (confirm(`¿Bloquear a ${friendUsername}?`)) {
-                                try {
-                                  await Friends.block(friendId);
-                                  await reload();
-                                } catch (error) {
-                                  alert('Error al bloquear usuario');
-                                }
-                              }
-                            }}
-                            className="px-3 py-1.5 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white text-xs rounded-lg transition-colors"
-                          >
-                            Bloquear
-                          </button>
+                          {isInstructorOrAdmin ? (
+                            <button
+                              disabled
+                              title="No puedes eliminar a un instructor o administrador"
+                              className="px-3 py-1.5 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 text-xs rounded-lg cursor-not-allowed"
+                            >
+                              🔒 Protegido
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                onClick={async () => {
+                                  if (confirm(`¿Eliminar a ${friendUsername} de tus amigos?`)) {
+                                    try {
+                                      await API.post(`/friends/unfriend/${friendId}`);
+                                      await reload();
+                                    } catch (error: any) {
+                                      alert(error.response?.data?.error || 'Error al eliminar amigo');
+                                    }
+                                  }
+                                }}
+                                className="px-3 py-1.5 bg-orange-600 dark:bg-orange-500 hover:bg-orange-700 dark:hover:bg-orange-600 text-white text-xs rounded-lg transition-colors"
+                              >
+                                Eliminar
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  if (confirm(`¿Bloquear a ${friendUsername}?`)) {
+                                    try {
+                                      await Friends.block(friendId);
+                                      await reload();
+                                    } catch (error) {
+                                      alert('Error al bloquear usuario');
+                                    }
+                                  }
+                                }}
+                                className="px-3 py-1.5 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white text-xs rounded-lg transition-colors"
+                              >
+                                Bloquear
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     );

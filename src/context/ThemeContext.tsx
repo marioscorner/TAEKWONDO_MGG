@@ -41,11 +41,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyTheme(newTheme);
   };
 
-  // Evitar flash de contenido sin tema
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Siempre proporcionar el contexto, incluso antes de montar
+  // Esto evita errores durante SSR/hidratación
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}

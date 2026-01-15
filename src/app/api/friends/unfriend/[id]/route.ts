@@ -21,6 +21,27 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
+    // Verificar que el amigo existe
+    const friend = await prisma.user.findUnique({
+      where: { id: friendId },
+      select: { id: true, role: true, username: true },
+    });
+
+    if (!friend) {
+      return NextResponse.json(
+        { error: 'Usuario no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // ALUMNOS no pueden eliminar a INSTRUCTORES o ADMIN
+    if (user.role === 'ALUMNO' && (friend.role === 'INSTRUCTOR' || friend.role === 'ADMIN')) {
+      return NextResponse.json(
+        { error: 'No puedes eliminar a un instructor o administrador de tu lista de amigos' },
+        { status: 403 }
+      );
+    }
+
     // Eliminar ambas direcciones de la amistad
     await prisma.$transaction([
       prisma.friendship.deleteMany({

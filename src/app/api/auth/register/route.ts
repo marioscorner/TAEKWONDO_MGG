@@ -51,6 +51,38 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Si es un ALUMNO, crear amistad automática con todos los INSTRUCTOR y ADMIN
+    if (user.role === 'ALUMNO') {
+      const instructors = await prisma.user.findMany({
+        where: {
+          OR: [
+            { role: 'INSTRUCTOR' },
+            { role: 'ADMIN' }
+          ]
+        },
+        select: { id: true }
+      });
+
+      // Crear amistades bidireccionales con cada instructor/admin
+      const friendships = instructors.flatMap(instructor => [
+        {
+          userId: user.id,
+          friendId: instructor.id,
+        },
+        {
+          userId: instructor.id,
+          friendId: user.id,
+        }
+      ]);
+
+      if (friendships.length > 0) {
+        await prisma.friendship.createMany({
+          data: friendships,
+          skipDuplicates: true,
+        });
+      }
+    }
+
     return NextResponse.json(
       {
         message: 'Usuario registrado correctamente',

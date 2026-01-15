@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import API from "@/lib/api";
+import { BELTS, getBeltBadgeClass } from "@/lib/belt-colors";
 
 type Student = {
   id: number;
@@ -29,6 +30,7 @@ export default function InstructorPanelPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingBelt, setEditingBelt] = useState<{ studentId: number; currentBelt: string; username: string } | null>(null);
 
   useEffect(() => {
     // Verificar que el usuario sea INSTRUCTOR o ADMIN
@@ -181,17 +183,12 @@ export default function InstructorPanelPage() {
                           💬 Chat
                         </button>
                         <button
-                          onClick={async () => {
-                            const newBelt = prompt(`Cambiar cinturón de ${student.username}\nCinturón actual: ${student.belt || 'Sin cinturón'}\n\nNuevo cinturón:`);
-                            if (newBelt) {
-                              try {
-                                await API.patch(`/instructor/students/${student.id}/belt`, { belt: newBelt });
-                                alert('Cinturón actualizado correctamente');
-                                await loadData();
-                              } catch (error: any) {
-                                alert(error.response?.data?.error || 'Error al actualizar cinturón');
-                              }
-                            }
+                          onClick={() => {
+                            setEditingBelt({
+                              studentId: student.id,
+                              currentBelt: student.belt || 'Blanco',
+                              username: student.username
+                            });
                           }}
                           className="px-3 py-1 bg-purple-600 dark:bg-purple-500 hover:bg-purple-700 dark:hover:bg-purple-600 text-white text-sm rounded transition-colors"
                         >
@@ -231,6 +228,66 @@ export default function InstructorPanelPage() {
           </button>
         </div>
       </div>
+
+      {/* Modal de cambio de cinturón */}
+      {editingBelt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+              Cambiar Cinturón
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Alumno: <span className="font-semibold text-gray-900 dark:text-white">{editingBelt.username}</span>
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              Cinturón actual: <span className={`font-semibold px-2 py-0.5 rounded text-xs ${getBeltBadgeClass(editingBelt.currentBelt)}`}>
+                {editingBelt.currentBelt}
+              </span>
+            </p>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nuevo cinturón:
+              </label>
+              <select
+                id="belt-select"
+                defaultValue={editingBelt.currentBelt}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                {BELTS.map((belt) => (
+                  <option key={belt} value={belt}>
+                    {belt}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  const select = document.getElementById('belt-select') as HTMLSelectElement;
+                  const newBelt = select.value;
+                  try {
+                    await API.patch(`/instructor/students/${editingBelt.studentId}/belt`, { belt: newBelt });
+                    alert('Cinturón actualizado correctamente');
+                    await loadData();
+                    setEditingBelt(null);
+                  } catch (error: any) {
+                    alert(error.response?.data?.error || 'Error al actualizar cinturón');
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-purple-600 dark:bg-purple-500 hover:bg-purple-700 dark:hover:bg-purple-600 text-white rounded-lg font-medium transition-colors"
+              >
+                Guardar
+              </button>
+              <button
+                onClick={() => setEditingBelt(null)}
+                className="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

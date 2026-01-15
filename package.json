@@ -11,12 +11,15 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:status": "prisma migrate status",
     "create-superuser": "ts-node scripts/create-superuser.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.1",
+    "@types/nodemailer": "^7.0.5",
     "autoprefixer": "^10.4.22",
     "axios": "^1.8.0",
     "bcrypt": "^5.1.1",
@@ -25,6 +28,7 @@
     "jose": "^5.9.6",
     "lucide-react": "^0.468.0",
     "next": "^15.5.6",
+    "nodemailer": "^7.0.12",
     "react": "^19.0.0",
     "react-day-picker": "^9.4.3",
     "react-dom": "^19.0.0",

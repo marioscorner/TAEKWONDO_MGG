@@ -115,12 +115,21 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               {pending ? "Iniciando sesión..." : "Iniciar sesión"}
             </Button>
 
-            {/* Register link */}
-            <div className="mt-4 text-center text-sm">
-              ¿No tienes una cuenta?{" "}
-              <a href="/register" className="underline underline-offset-4 text-blue-600 hover:text-blue-700">
-                Regístrate
-              </a>
+            {/* Register links */}
+            <div className="space-y-2">
+              <div className="text-center text-sm">
+                ¿No tienes una cuenta?{" "}
+                <a href="/register" className="text-blue-600 hover:underline dark:text-blue-400">
+                  Regístrate
+                </a>
+              </div>
+              
+              <div className="text-center text-sm">
+                ¿Eres instructor?{" "}
+                <a href="/register/instructor" className="text-blue-600 hover:underline dark:text-blue-400">
+                  Regístrate aquí
+                </a>
+              </div>
             </div>
           </form>
         </CardContent>

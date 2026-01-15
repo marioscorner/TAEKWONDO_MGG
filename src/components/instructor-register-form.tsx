@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { registerUser } from "@/lib/auth";
+import API from "@/lib/api";
 
-export default function RegisterForm() {
+export default function InstructorRegisterForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +27,7 @@ export default function RegisterForm() {
     const confirmPassword = formData.get("confirmPassword") as string;
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
+    const secretPassword = formData.get("secretPassword") as string;
 
     // Validaciones básicas
     if (password.length < 6) {
@@ -47,28 +48,37 @@ export default function RegisterForm() {
       return;
     }
 
+    if (!secretPassword || secretPassword.trim().length === 0) {
+      setError("La contraseña secreta de instructor es requerida");
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Llamar al endpoint de registro
-      await registerUser({
+      // Llamar al endpoint de registro de instructor
+      await API.post("/auth/register/instructor", {
         username: username.trim(),
         email: email.trim().toLowerCase(),
         password,
         firstName: firstName?.trim(),
         lastName: lastName?.trim(),
+        secretPassword: secretPassword.trim(),
       });
 
       setSuccess(true);
       
       // Redirigir al login después de 2 segundos
       setTimeout(() => {
-        router.push("/login?registered=true");
+        router.push("/login?registered=instructor");
       }, 2000);
     } catch (err: any) {
-      console.error("Error en registro:", err);
+      console.error("Error en registro de instructor:", err);
       
       // Mostrar error específico del servidor
       if (err.response?.data?.error) {
         setError(err.response.data.error);
+      } else if (err.response?.status === 403) {
+        setError("Contraseña secreta incorrecta");
       } else if (err.response?.status === 400) {
         setError("El email o nombre de usuario ya está registrado");
       } else {
@@ -83,9 +93,9 @@ export default function RegisterForm() {
     return (
       <Card className="mx-auto max-w-sm">
         <CardHeader>
-          <CardTitle className="text-green-600">¡Cuenta creada!</CardTitle>
+          <CardTitle className="text-green-600">🥋 ¡Instructor registrado!</CardTitle>
           <CardDescription>
-            Tu cuenta ha sido creada exitosamente. Redirigiendo al login...
+            Tu cuenta de instructor ha sido creada exitosamente. Redirigiendo al login...
           </CardDescription>
         </CardHeader>
       </Card>
@@ -95,13 +105,32 @@ export default function RegisterForm() {
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
-        <CardTitle>Crear cuenta</CardTitle>
+        <CardTitle>🥋 Registro de Instructor</CardTitle>
         <CardDescription>
-          Completa el formulario para registrarte en la plataforma
+          Completa el formulario para registrarte como instructor. Necesitarás la contraseña secreta.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
+          {/* Contraseña secreta - PRIMERO para destacarla */}
+          <div className="p-4 border-2 border-blue-500 dark:border-blue-400 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+            <Label htmlFor="secretPassword" className="text-blue-700 dark:text-blue-300 font-bold">
+              🔐 Contraseña Secreta de Instructor <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="secretPassword"
+              name="secretPassword"
+              type="password"
+              placeholder="Contraseña proporcionada por el administrador"
+              required
+              disabled={loading}
+              className="mt-2"
+            />
+            <p className="text-xs text-blue-600 dark:text-blue-300 mt-2">
+              Esta contraseña te la proporciona el administrador del sistema
+            </p>
+          </div>
+
           {/* Nombre de usuario */}
           <div>
             <Label htmlFor="username">
@@ -133,23 +162,29 @@ export default function RegisterForm() {
             />
           </div>
 
-          {/* Nombre (opcional) */}
+          {/* Nombre */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="firstName">Nombre</Label>
+              <Label htmlFor="firstName">
+                Nombre <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="firstName"
                 name="firstName"
                 placeholder="Mario"
+                required
                 disabled={loading}
               />
             </div>
             <div>
-              <Label htmlFor="lastName">Apellidos</Label>
+              <Label htmlFor="lastName">
+                Apellidos <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="lastName"
                 name="lastName"
                 placeholder="Gutiérrez"
+                required
                 disabled={loading}
               />
             </div>
@@ -158,7 +193,7 @@ export default function RegisterForm() {
           {/* Contraseña */}
           <div>
             <Label htmlFor="password">
-              Contraseña <span className="text-red-500">*</span>
+              Contraseña de cuenta <span className="text-red-500">*</span>
             </Label>
             <Input
               id="password"
@@ -197,18 +232,27 @@ export default function RegisterForm() {
 
           {/* Botón submit */}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Creando cuenta..." : "Crear cuenta"}
+            {loading ? "Creando cuenta de instructor..." : "Registrarse como Instructor"}
           </Button>
 
-          {/* Link a login */}
-          <div className="mt-4 text-center text-sm">
-            ¿Ya tienes cuenta?{" "}
-            <a href="/login" className="underline underline-offset-4 text-blue-600 hover:text-blue-700 dark:text-blue-400">
-              Inicia sesión
-            </a>
+          {/* Links */}
+          <div className="space-y-2">
+            <div className="text-center text-sm">
+              <a href="/register" className="text-blue-600 hover:underline dark:text-blue-400">
+                ¿Registrarte como alumno?
+              </a>
+            </div>
+            
+            <div className="text-center text-sm">
+              ¿Ya tienes cuenta?{" "}
+              <a href="/login" className="underline underline-offset-4 text-blue-600 hover:text-blue-700">
+                Inicia sesión
+              </a>
+            </div>
           </div>
         </form>
       </CardContent>
     </Card>
   );
 }
+

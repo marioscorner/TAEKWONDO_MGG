@@ -57,6 +57,10 @@
 - [x] Lista de usuarios bloqueados
 - [x] Botón "💬 Chat" para iniciar conversación con cada amigo
 - [x] Buscador de usuarios mostrando solo: username, nombre completo, rol
+- [x] **NUEVO:** Amistad automática entre alumnos e instructores/admin al registrarse
+- [x] **NUEVO:** Alumnos no pueden eliminar a instructores/admin de su lista
+- [x] **NUEVO:** Badges visuales para instructores y admin en lista de amigos
+- [x] **NUEVO:** Botón "🔒 Protegido" para instructores/admin (no eliminables)
 
 ### ✅ **Sistema de Chat**
 
@@ -102,6 +106,10 @@
 - [x] Vista con colores y gradientes de cinturones
 - [x] Botón "💬 Chat" para iniciar conversación con alumno
 - [x] Acceso restringido a INSTRUCTOR/ADMIN
+- [x] **NUEVO:** Modal con dropdown para seleccionar cinturón (en lugar de prompt)
+- [x] **NUEVO:** Muestra todos los alumnos registrados (sin filtrar por amistad)
+- [x] **NUEVO:** Vista previa del cinturón actual con badge visual
+- [x] **NUEVO:** Selector con todos los 12 niveles de cinturones
 
 ### ✅ **Temario Personalizado** 📚
 
@@ -210,38 +218,38 @@ npm install react-icons
 
 ---
 
-### 🔴 **3. Recuperación de Contraseña Completa** 🔐
+### 🟡 **3. Recuperación de Contraseña Completa** 🔐
 
-**Prioridad: ALTA** | **Estimado: 1 día**
+**Prioridad: MEDIA** | **Estado: 95% - Falta solo configurar SMTP**
 
 - [x] Endpoint `POST /api/auth/password/request-reset`
 - [x] Endpoint `POST /api/auth/password/reset`
 - [x] Validación de tokens
-- [ ] **Configurar servicio SMTP:**
-  - [ ] Opción 1: Gmail SMTP
-  - [ ] Opción 2: SendGrid
-  - [ ] Opción 3: Resend.com (recomendado)
-- [ ] **Template de email HTML** para reset
-- [ ] **Página de solicitud** en `/reset-password`
-- [ ] **Página de confirmación** en `/reset-password/confirm/[token]`
-- [ ] Integrar con `nodemailer` o servicio de email
-- [ ] Variables de entorno para SMTP:
-  ```
-  SMTP_HOST=
-  SMTP_PORT=
-  SMTP_USER=
-  SMTP_PASS=
-  SMTP_FROM=
-  ```
+- [x] **Template de email HTML** para reset (profesional y bonito)
+- [x] **Página de solicitud** en `/reset-password`
+- [x] **Página de confirmación** en `/reset-password/confirm?token=...`
+- [x] Integrar con `nodemailer`
+- [x] Modelo `PasswordResetToken` en BD
+- [x] Link "¿Olvidaste tu contraseña?" en login
+- [x] Documentación completa (`CONFIGURACION_EMAIL.md`)
+- [ ] **⏳ PENDIENTE: Configurar servicio SMTP (Gmail):**
+  - [ ] Habilitar verificación en 2 pasos en Gmail
+  - [ ] Crear contraseña de aplicación
+  - [ ] Añadir variables SMTP a `.env.local`
+  - [ ] Probar envío de emails
+  - [ ] Ver guía en: `CONFIGURACION_EMAIL.md`
 
-**Archivos a crear/modificar:**
+**Archivos creados:**
 ```
-src/lib/email.ts                           (nuevo servicio)
-src/app/reset-password/confirm/[token]/page.tsx
-src/components/auth/RequestResetForm.tsx
-src/components/auth/ConfirmResetForm.tsx
-src/templates/email/password-reset.tsx
+✅ src/lib/email.ts                           (servicio completo)
+✅ src/app/reset-password/page.tsx            (solicitud)
+✅ src/app/reset-password/confirm/page.tsx     (confirmación)
+✅ CONFIGURACION_EMAIL.md                      (guía SMTP)
+✅ RECUPERACION_PASSWORD_COMPLETADO.md         (documentación)
+✅ TAREAS_PENDIENTES.md                        (recordatorio)
 ```
+
+**Nota:** La funcionalidad está **completamente implementada**. Solo falta configurar las credenciales SMTP en `.env.local` (15-20 minutos). Ver `TAREAS_PENDIENTES.md` para detalles.
 
 ---
 
@@ -685,7 +693,7 @@ Privadas:
 🔴 **Almacenamiento S3** para documentos y multimedia  
 🔴 **Dockerfile** y preparación para deploy  
 🔴 **Revisión completa** de enlaces y estética  
-🟡 **Completar recuperación de contraseña** con emails  
+🟡 **Configurar Gmail SMTP** para recuperación de contraseña (ver `TAREAS_PENDIENTES.md`)  
 
 ### **Veredicto:**
 
@@ -775,5 +783,40 @@ npm install swiper
 
 ---
 
-**Última revisión:** 28 Noviembre 2025 - v2.0  
-**Estado del proyecto:** 🟢 Excelente - Listo para fase de contenido y deploy
+## 🆕 **ÚLTIMAS ACTUALIZACIONES** (8 Enero 2026)
+
+### **Sistema de Amistades Mejorado:**
+- ✅ Amistad automática: Cuando un alumno se registra, se hace amigo automáticamente de todos los instructores y administradores
+- ✅ Protección de amistades: Los alumnos no pueden eliminar a instructores o administradores de su lista
+- ✅ Indicadores visuales: Badges de "👑 Admin" y "🥋 Instructor" en la lista de amigos
+- ✅ Botón protegido: Muestra "🔒 Protegido" en lugar de "Eliminar" para instructores/admin
+
+### **Panel de Instructor Mejorado:**
+- ✅ Listado completo: Muestra TODOS los alumnos registrados (sin depender de amistad)
+- ✅ Selector de cinturones: Modal con dropdown elegante para cambiar cinturones
+- ✅ Vista previa: Muestra el cinturón actual con badge visual antes de cambiar
+- ✅ UX mejorada: Interfaz más intuitiva y profesional
+
+### **Recuperación de Contraseña Implementada:**
+- ✅ Código completo: Endpoints, páginas, servicio de email, templates HTML
+- ✅ Base de datos: Modelo `PasswordResetToken` añadido
+- ✅ UI profesional: Páginas de solicitud y confirmación con diseño moderno
+- ✅ Email template: HTML responsive con branding de Taekwondo
+- ✅ Seguridad: Tokens únicos, expiración, uso único
+- ⏳ **Pendiente:** Configurar credenciales SMTP de Gmail (ver `TAREAS_PENDIENTES.md`)
+
+### **Registro de Instructores Implementado:**
+- ✅ Endpoint especial: `POST /api/auth/register/instructor`
+- ✅ Página de registro: `/register/instructor`
+- ✅ Contraseña secreta: Protección con `INSTRUCTOR_SECRET_PASSWORD`
+- ✅ Asignación automática: Rol INSTRUCTOR + Cinturón Negro
+- ✅ Amistad automática: Con todos los alumnos existentes
+- ✅ UI destacada: Campo de contraseña secreta resaltado
+- ✅ Links útiles: Desde registro normal y hacia login
+- ✅ Documentación completa: `REGISTRO_INSTRUCTOR.md`
+- ⏳ **Pendiente:** Configurar variable `INSTRUCTOR_SECRET_PASSWORD` en `.env.local`
+
+---
+
+**Última revisión:** 14 Enero 2026 - v2.2  
+**Estado del proyecto:** 🟢 Excelente - Sistema de gestión y registro completado

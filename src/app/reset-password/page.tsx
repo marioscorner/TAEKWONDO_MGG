@@ -1,73 +1,99 @@
 // src/app/reset-password/page.tsx
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { confirmPasswordReset } from "@/lib/auth"; // existe en tu src/lib/auth.ts
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import API from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export default function ResetPasswordPage() {
-  const sp = useSearchParams();
+export default function RequestResetPasswordPage() {
   const router = useRouter();
-  const uid = Number(sp.get("uid"));
-  const token = sp.get("token") || "";
-  const [pwd, setPwd] = useState("");
-  const [ok, setOk] = useState(false);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
     setError(null);
+
     try {
-      await confirmPasswordReset(uid, token, pwd);
-      setOk(true);
-    } catch (err: unknown) {
-      if (typeof err === "object" && err !== null && "response" in err) {
-        const resp = err as { response?: { data?: { detail?: string } } };
-        setError(resp.response?.data?.detail || "Error al cambiar la contraseña");
-      } else if (err instanceof Error) {
-        setError(err.message || "Error al cambiar la contraseña");
-      } else {
-        setError("Error al cambiar la contraseña");
-      }
+      await API.post("/auth/password/request-reset", { email });
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Error al solicitar recuperación");
+    } finally {
+      setLoading(false);
     }
   }
 
-  if (ok)
+  if (success) {
     return (
-      <div className="p-6 text-center space-y-4">
-        <h2 className="text-2xl font-semibold text-emerald-700">
-          Contraseña actualizada
-        </h2>
-        <button
-          onClick={() => router.push("/login")}
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          Inicia sesión
-        </button>
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-900">
+        <Card className="mx-auto max-w-md">
+          <CardHeader>
+            <CardTitle className="text-green-600">✅ Email enviado</CardTitle>
+            <CardDescription>
+              Si el email existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña.
+              Revisa tu bandeja de entrada (y la carpeta de spam).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => router.push("/login")} className="w-full">
+              Volver al login
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
+  }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="max-w-sm mx-auto p-6 border rounded space-y-4"
-    >
-      <h2 className="text-xl font-semibold">Restablecer contraseña</h2>
-      <input
-        type="password"
-        value={pwd}
-        onChange={(e) => setPwd(e.target.value)}
-        placeholder="Nueva contraseña"
-        required
-        className="w-full border rounded px-3 py-2"
-      />
-      {error && <p className="text-red-600 text-sm">{error}</p>}
-      <button
-        type="submit"
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded"
-      >
-        Cambiar contraseña
-      </button>
-    </form>
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-900">
+      <Card className="mx-auto max-w-md w-full">
+        <CardHeader>
+          <CardTitle>🔑 Recuperar contraseña</CardTitle>
+          <CardDescription>
+            Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                required
+                disabled={loading}
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 rounded bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">
+                {error}
+              </div>
+            )}
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Enviando..." : "Enviar enlace de recuperación"}
+            </Button>
+
+            <div className="text-center text-sm">
+              <a href="/login" className="text-blue-600 hover:underline dark:text-blue-400">
+                Volver al login
+              </a>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -52,18 +52,18 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
             ¿Qué es el Taekwondo?
           </h2>
-          
+
           <div className="grid md:grid-cols-2 gap-8 mb-8">
             <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl">
               <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
                 Un Arte Marcial Completo
               </h3>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                El <strong>Taekwondo</strong> es un arte marcial de origen coreano
-                que combina técnicas de defensa personal con un profundo enfoque
-                en el desarrollo físico y mental. Es un deporte olímpico que
-                destaca por sus potentes y variadas patadas, así como por los
-                valores que promueve: respeto, disciplina, autocontrol y
+                El <strong>Taekwondo</strong> es un arte marcial de origen
+                coreano que combina técnicas de defensa personal con un profundo
+                enfoque en el desarrollo físico y mental. Es un deporte olímpico
+                que destaca por sus potentes y variadas patadas, así como por
+                los valores que promueve: respeto, disciplina, autocontrol y
                 perseverancia.
               </p>
             </div>
@@ -73,10 +73,11 @@ export default function Home() {
                 Cuerpo y Mente en Armonía
               </h3>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                Además de ser una práctica deportiva, el Taekwondo busca formar el
-                carácter de quien lo entrena, fomentando la armonía entre cuerpo y
-                mente. En competición, se divide en dos modalidades principales:{" "}
-                <em>combate</em> (kyorugi) y <em>poomsae</em> (formas técnicas).
+                Además de ser una práctica deportiva, el Taekwondo busca formar
+                el carácter de quien lo entrena, fomentando la armonía entre
+                cuerpo y mente. En competición, se divide en dos modalidades
+                principales: <em>combate</em> (kyorugi) y <em>poomsae</em>{" "}
+                (formas técnicas).
               </p>
             </div>
           </div>
@@ -86,8 +87,10 @@ export default function Home() {
               📋 Inscripciones
             </h3>
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
-              Las inscripciones se realizan <strong>directamente en el centro</strong> donde se imparten las clases.
-              Puedes acercarte en el horario de entrenamiento o contactarme para más información.
+              Las inscripciones se realizan{" "}
+              <strong>directamente en el centro</strong> donde se imparten las
+              clases. Puedes acercarte en el horario de entrenamiento o
+              contactarme para más información.
             </p>
           </div>
         </div>
@@ -109,14 +112,17 @@ export default function Home() {
               <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
                 Centro Dotacional Integrado Arganzuela
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">📍</span>
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">Dirección:</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      Dirección:
+                    </p>
                     <p className="text-gray-700 dark:text-gray-300">
-                      C. de Palos de la Frontera, 40<br />
+                      Calle Canarias, 17
+                      <br />
                       Arganzuela, 28045 Madrid, España
                     </p>
                   </div>
@@ -125,9 +131,11 @@ export default function Home() {
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">🚇</span>
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">Metro:</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      Metro:
+                    </p>
                     <p className="text-gray-700 dark:text-gray-300">
-                      Línea 3 y 6 - Parada: Arganzuela-Planetario
+                      Línea 3 - Parada: Palos de la Frontera
                     </p>
                   </div>
                 </div>
@@ -135,17 +143,18 @@ export default function Home() {
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">⏰</span>
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">Horarios:</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      Horarios:
+                    </p>
                     <p className="text-gray-700 dark:text-gray-300">
-                      Consultar horarios en el centro<br />
-                      o contactar para más información
+                      Martes y Jueves: 17:00 - 20:00
                     </p>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                   <a
-                    href="https://www.google.com/maps/dir//C.+de+Palos+de+la+Frontera,+40,+Arganzuela,+28045+Madrid"
+                    href="https://www.google.com/maps/search/?api=1&query=Centro+Dotacional+Integrado+Arganzuela,+Calle+Canarias+17,+28045+Madrid"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline font-medium"
@@ -159,7 +168,7 @@ export default function Home() {
             {/* Mapa de Google */}
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg h-full">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3037.5!2d-3.7006647!3d40.395887!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDIzJzQ1LjIiTiAzwrA0MicwMi40Ilc!5e0!3m2!1ses!2ses!4v1234567890"
+                src="https://www.google.com/maps?q=Centro+Dotacional+Integrado+Arganzuela,+Calle+Canarias+17,+28045+Madrid&output=embed"
                 width="100%"
                 height="400"
                 style={{ border: 0 }}
@@ -167,7 +176,7 @@ export default function Home() {
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="rounded-lg"
-                title="Ubicación: C. de Palos de la Frontera, 40, Arganzuela, 28045 Madrid"
+                title="Centro Dotacional Integrado Arganzuela"
               />
             </div>
           </div>
@@ -187,7 +196,9 @@ export default function Home() {
               rel="noopener noreferrer"
               className="p-4 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg text-center transition-colors"
             >
-              <p className="font-semibold text-gray-900 dark:text-white">Federación Madrileña</p>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                Federación Madrileña
+              </p>
             </a>
             <a
               href="https://rfetaekwondo.com/"
@@ -195,7 +206,9 @@ export default function Home() {
               rel="noopener noreferrer"
               className="p-4 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg text-center transition-colors"
             >
-              <p className="font-semibold text-gray-900 dark:text-white">Federación Española</p>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                Federación Española
+              </p>
             </a>
             <a
               href="https://worldtaekwondo.org/"
@@ -203,7 +216,9 @@ export default function Home() {
               rel="noopener noreferrer"
               className="p-4 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg text-center transition-colors"
             >
-              <p className="font-semibold text-gray-900 dark:text-white">World Taekwondo</p>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                World Taekwondo
+              </p>
             </a>
             <a
               href="https://olympics.com/es/deportes/taekwondo/"
@@ -211,7 +226,9 @@ export default function Home() {
               rel="noopener noreferrer"
               className="p-4 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg text-center transition-colors"
             >
-              <p className="font-semibold text-gray-900 dark:text-white">Taekwondo Olímpico</p>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                Taekwondo Olímpico
+              </p>
             </a>
           </div>
         </div>

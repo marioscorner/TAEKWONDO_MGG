@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sanitizeEmail, generateRandomToken } from '@/lib/auth-helpers';
+import { sendEmail, getPasswordResetEmailTemplate } from '@/lib/email';
 import { z } from 'zod';
 
 const requestResetSchema = z.object({
@@ -32,13 +33,32 @@ export async function POST(req: NextRequest) {
     const resetToken = generateRandomToken();
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
 
-    // TODO: Guardar token en BD y enviar email
-    // Por ahora, solo logging
-    console.log(`Reset token para ${email}: ${resetToken}`);
-    console.log(`Link: ${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`);
+    // Guardar token en BD
+    await prisma.passwordResetToken.create({
+      data: {
+        token: resetToken,
+        userId: user.id,
+        expiresAt,
+      },
+    });
 
-    // TODO: Implementar envío de email con SMTP
-    // await sendResetPasswordEmail(user.email, resetToken);
+    // Crear URL de reset
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password/confirm?token=${resetToken}`;
+
+    // Enviar email
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: '🥋 Recuperación de Contraseña - Taekwondo Mario Gutiérrez',
+        html: getPasswordResetEmailTemplate(user.username, resetUrl),
+      });
+      
+      console.log(`✅ Email de recuperación enviado a: ${user.email}`);
+    } catch (emailError) {
+      console.error('❌ Error al enviar email:', emailError);
+      // No fallar la petición si el email falla, pero loguear
+      // En producción, podrías querer manejar esto de forma diferente
+    }
 
     return NextResponse.json({
       message: 'Si el email existe, recibirás un enlace de recuperación.',

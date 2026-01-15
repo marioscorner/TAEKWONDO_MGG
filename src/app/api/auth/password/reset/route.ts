@@ -14,30 +14,34 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { token, newPassword } = resetPasswordSchema.parse(body);
 
-    // TODO: Verificar token en BD
-    // Por ahora, retornar que no está implementado
-    return NextResponse.json(
-      { 
-        error: 'Recuperación de contraseña no implementada completamente. Contacta al administrador.',
-        info: 'Se requiere configurar SMTP y tabla de reset tokens'
-      },
-      { status: 501 }
-    );
-
-    // Código para cuando esté implementado:
-    /*
+    // Buscar token en BD
     const resetRecord = await prisma.passwordResetToken.findUnique({
       where: { token },
       include: { user: true },
     });
 
-    if (!resetRecord || resetRecord.expiresAt < new Date() || resetRecord.used) {
+    if (!resetRecord) {
       return NextResponse.json(
-        { error: 'Token inválido o expirado' },
+        { error: 'Token inválido' },
         { status: 400 }
       );
     }
 
+    if (resetRecord.used) {
+      return NextResponse.json(
+        { error: 'Este token ya fue utilizado' },
+        { status: 400 }
+      );
+    }
+
+    if (resetRecord.expiresAt < new Date()) {
+      return NextResponse.json(
+        { error: 'Token expirado. Solicita uno nuevo.' },
+        { status: 400 }
+      );
+    }
+
+    // Actualizar contraseña y marcar token como usado
     const hashedPassword = await hashPassword(newPassword);
 
     await prisma.$transaction([
@@ -51,8 +55,11 @@ export async function POST(req: NextRequest) {
       }),
     ]);
 
-    return NextResponse.json({ message: 'Contraseña actualizada correctamente' });
-    */
+    console.log(`✅ Contraseña actualizada para usuario: ${resetRecord.user.username}`);
+
+    return NextResponse.json({ 
+      message: 'Contraseña actualizada correctamente' 
+    });
   } catch (error) {
     console.error('Error en reset de contraseña:', error);
     return NextResponse.json(
