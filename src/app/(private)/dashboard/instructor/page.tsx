@@ -19,8 +19,7 @@ type Student = {
 type Stats = {
   totalStudents: number;
   totalInstructors: number;
-  totalConversations: number;
-  totalMessages: number;
+  unreadConversations: number;
 };
 
 export default function InstructorPanelPage() {
@@ -31,6 +30,7 @@ export default function InstructorPanelPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingBelt, setEditingBelt] = useState<{ studentId: number; currentBelt: string; username: string } | null>(null);
+  const [beltUpdateStatus, setBeltUpdateStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     // Verificar que el usuario sea INSTRUCTOR o ADMIN
@@ -94,7 +94,7 @@ export default function InstructorPanelPage() {
 
       {/* Estadísticas */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
             <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats.totalStudents}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Alumnos</div>
@@ -104,12 +104,8 @@ export default function InstructorPanelPage() {
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Instructores</div>
           </div>
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
-            <div className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.totalConversations}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Conversaciones</div>
-          </div>
-          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-6">
-            <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">{stats.totalMessages}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Mensajes</div>
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.unreadConversations}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Conversaciones sin leer</div>
           </div>
         </div>
       )}
@@ -153,48 +149,30 @@ export default function InstructorPanelPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{student.email}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                        student.belt === 'Negro' ? 'bg-black text-white' :
-                        student.belt === 'Rojo' ? 'bg-red-500 text-white' :
-                        student.belt === 'Azul-Rojo' ? 'bg-gradient-to-r from-blue-500 to-red-500 text-white' :
-                        student.belt === 'Azul' ? 'bg-blue-500 text-white' :
-                        student.belt === 'Verde-Azul' ? 'bg-gradient-to-r from-green-500 to-blue-500 text-white' :
-                        student.belt === 'Verde' ? 'bg-green-500 text-white' :
-                        student.belt === 'Naranja-Verde' ? 'bg-gradient-to-r from-orange-500 to-green-500 text-white' :
-                        student.belt === 'Naranja' ? 'bg-orange-500 text-white' :
-                        student.belt === 'Amarillo-Naranja' ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white' :
-                        student.belt === 'Amarillo' ? 'bg-yellow-400 text-gray-800' :
-                        student.belt === 'Blanco-Amarillo' ? 'bg-gradient-to-r from-gray-100 to-yellow-400 text-gray-800' :
-                        student.belt === 'Blanco' ? 'bg-gray-100 text-gray-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <button
+                        onClick={() => {
+                          setEditingBelt({
+                            studentId: student.id,
+                            currentBelt: student.belt || 'Blanco',
+                            username: student.username
+                          });
+                        }}
+                        className={`px-2 py-1 rounded text-xs font-semibold cursor-pointer hover:opacity-80 transition-opacity ${getBeltBadgeClass(student.belt)}`}
+                        title="Click para cambiar cinturón"
+                      >
                         {student.belt || 'Sin cinturón'}
-                      </span>
+                      </button>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                       {new Date(student.createdAt).toLocaleDateString('es-ES')}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => router.push(`/dashboard/chats`)}
-                          className="px-3 py-1 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm rounded transition-colors"
-                        >
-                          💬 Chat
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingBelt({
-                              studentId: student.id,
-                              currentBelt: student.belt || 'Blanco',
-                              username: student.username
-                            });
-                          }}
-                          className="px-3 py-1 bg-purple-600 dark:bg-purple-500 hover:bg-purple-700 dark:hover:bg-purple-600 text-white text-sm rounded transition-colors"
-                        >
-                          🥋 Cambiar
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => router.push(`/dashboard/chats`)}
+                        className="px-3 py-1 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm rounded transition-colors"
+                      >
+                        💬 Chat
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -244,6 +222,15 @@ export default function InstructorPanelPage() {
                 {editingBelt.currentBelt}
               </span>
             </p>
+            {beltUpdateStatus && (
+              <div className={`mb-4 p-3 rounded-lg text-sm ${
+                beltUpdateStatus.type === 'success'
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+              }`}>
+                {beltUpdateStatus.message}
+              </div>
+            )}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Nuevo cinturón:
@@ -267,11 +254,14 @@ export default function InstructorPanelPage() {
                   const newBelt = select.value;
                   try {
                     await API.patch(`/instructor/students/${editingBelt.studentId}/belt`, { belt: newBelt });
-                    alert('Cinturón actualizado correctamente');
+                    setBeltUpdateStatus({ type: 'success', message: 'Cinturón actualizado correctamente' });
                     await loadData();
-                    setEditingBelt(null);
+                    setTimeout(() => {
+                      setEditingBelt(null);
+                      setBeltUpdateStatus(null);
+                    }, 1000);
                   } catch (error: any) {
-                    alert(error.response?.data?.error || 'Error al actualizar cinturón');
+                    setBeltUpdateStatus({ type: 'error', message: error.response?.data?.error || 'Error al actualizar cinturón' });
                   }
                 }}
                 className="flex-1 px-4 py-2 bg-purple-600 dark:bg-purple-500 hover:bg-purple-700 dark:hover:bg-purple-600 text-white rounded-lg font-medium transition-colors"

@@ -153,34 +153,26 @@
 
 ## 🚧 **EN DESARROLLO - ALTA PRIORIDAD**
 
-### 🔴 **1. Landing Page Profesional** 🏠
+### ✅ **1. Landing Page Profesional** 🏠
 
-**Prioridad: ALTA** | **Estimado: 1 día**
+**Prioridad: COMPLETADA** | **Estado: 100% completado**
 
-- [ ] **Diseño de Landing Page** que incluya:
-  - [ ] Hero section atractivo con imagen de taekwondo
-  - [ ] Sección "¿Qué es el Taekwondo?"
-    - [ ] Historia breve
-    - [ ] Beneficios físicos y mentales
-    - [ ] Valores del Taekwondo
-  - [ ] Sección "Nuestro Gimnasio"
-    - [ ] Localización con Google Maps integrado
-    - [ ] Dirección completa
-    - [ ] Horarios de clases
-    - [ ] Información de contacto
-  - [ ] Sección de CTA (Call to Action): "Únete ahora"
-  - [ ] Footer con redes sociales
-  - [ ] Animaciones suaves (AOS, Framer Motion)
-  
-**Archivos a crear:**
+- [x] Hero section atractivo con imagen de taekwondo
+- [x] Sección "¿Qué es el Taekwondo?" con información completa
+- [x] Sección "Dónde Encontrarme" con:
+  - [x] Localización con Google Maps integrado
+  - [x] Dirección completa (Centro Dotacional Integrado Arganzuela)
+  - [x] Horarios de clases (Martes y Jueves: 17:00 - 20:00)
+  - [x] Información de transporte (Metro línea 3)
+- [x] Sección de CTA (Call to Action): "Únete ahora"
+- [x] Enlaces oficiales (Federaciones)
+- [x] Diseño responsive y dark mode
+- [x] Footer funcional (sin redes sociales - no aplica)
+
+**Archivos existentes:**
 ```
-src/app/page.tsx              (rediseñar landing)
-src/components/landing/
-  - Hero.tsx
-  - AboutTaekwondo.tsx
-  - GymLocation.tsx
-  - Benefits.tsx
-  - CallToAction.tsx
+✅ src/app/page.tsx              (landing completa y funcional)
+✅ src/components/Footer.tsx    (footer básico - sin redes sociales)
 ```
 
 ---
@@ -253,57 +245,7 @@ npm install react-icons
 
 ---
 
-### 🔴 **4. Sistema de Almacenamiento S3** 📦
-
-**Prioridad: ALTA** | **Estimado: 2 días**
-
-- [ ] **Configurar Supabase Storage** (recomendado) o AWS S3
-- [ ] **Bucket para documentos** educativos:
-  - [ ] PDFs de técnicas por cinturón
-  - [ ] Videos de poomsaes
-  - [ ] Manuales de taekwondo
-  - [ ] Reglamentos
-- [ ] **Bucket para multimedia del chat:**
-  - [ ] Imágenes enviadas en chats
-  - [ ] Videos (opcional)
-  - [ ] Archivos adjuntos
-- [ ] **Endpoint de upload** mejorado:
-  - [ ] Soporte múltiples tipos de archivo
-  - [ ] Compresión de imágenes
-  - [ ] Validación de tipos MIME
-  - [ ] Límites de tamaño
-- [ ] **Migrar avatares y grupos** a S3/Supabase Storage
-- [ ] **Integración en temario:**
-  - [ ] Links de descarga de PDFs
-  - [ ] Embeds de videos
-  - [ ] Previews de documentos
-
-**Variables de entorno:**
-```
-# Supabase Storage (recomendado)
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# O AWS S3
-AWS_REGION=
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_BUCKET_NAME=
-```
-
-**Archivos a crear/modificar:**
-```
-src/lib/storage.ts              (servicio de S3/Supabase)
-src/app/api/upload/document/route.ts
-src/app/api/upload/chat-media/route.ts
-src/components/temario/DocumentList.tsx
-src/components/chat/MediaUpload.tsx
-```
-
----
-
-### 🔴 **5. Preparar Deploy con Docker** 🐳
+### 🔴 **4. Preparar Deploy con Docker** 🐳
 
 **Prioridad: ALTA** | **Estimado: 1 día**
 
@@ -352,7 +294,7 @@ CMD ["npm", "start"]
 
 ---
 
-### 🔴 **6. Revisión Completa de Enlaces y Estética** 🎨
+### 🔴 **5. Revisión Completa de Enlaces y Estética** 🎨
 
 **Prioridad: MEDIA-ALTA** | **Estimado: 1 día**
 
@@ -431,6 +373,7 @@ Privadas:
 - [ ] Enviar archivos PDF/documentos
 - [ ] Límite de tamaño de archivos
 - [ ] Gallery view de imágenes en chat
+- [ ] **Nota:** Los archivos se subirán usando el sistema de upload actual (sin S3)
 
 ### ✏️ **Chat: Editar/Eliminar Mensajes**
 
@@ -493,10 +436,11 @@ Privadas:
   - [ ] Notas del instructor
   
 - [ ] **Biblioteca de documentos:**
-  - [ ] Videos de técnicas por cinturón
-  - [ ] PDFs de poomsaes
+  - [ ] Videos de técnicas por cinturón (embeds de YouTube/Vimeo)
+  - [ ] Links a PDFs externos
   - [ ] Reglamento de competición
   - [ ] Material de estudio
+  - [ ] **Nota:** Los documentos se enlazarán externamente (sin almacenamiento propio)
 
 ---
 
@@ -589,24 +533,23 @@ Privadas:
 
 ### **🔥 SPRINT 1 (Esta semana) - Deploy Ready**
 
-1. ✅ **Landing Page profesional** con info de taekwondo y gimnasio
-2. ✅ **About Me** con carrusel de fotos
-3. ✅ **Configurar S3/Supabase Storage** para documentos
-4. ✅ **Preparar Dockerfile** y documentación de deploy
-5. ✅ **Revisión de enlaces y estética**
-6. ✅ **Subir fotos y archivos** a S3
+1. 🟡 **Landing Page profesional** (90% - falta footer con redes sociales)
+2. ⏳ **About Me** con carrusel de fotos
+3. ✅ **Preparar Dockerfile** y documentación de deploy
+4. ✅ **Revisión de enlaces y estética**
+5. ⏳ **Configurar SMTP** para recuperación de contraseña
 
 **Objetivo:** Tener la app lista para deploy público
 
 ---
 
-### **🔥 SPRINT 2 (Próxima semana) - Emails & Documentos**
+### **🔥 SPRINT 2 (Próxima semana) - Emails & Multimedia**
 
 1. ⏳ **Configurar SMTP** y servicio de email
 2. ⏳ **Completar recuperación de contraseña** funcional
-3. ⏳ **Integrar documentos** del temario con S3
-4. ⏳ **Email de bienvenida** al registrarse
-5. ⏳ **Envío de imágenes** en chat
+3. ⏳ **Email de bienvenida** al registrarse
+4. ⏳ **Envío de imágenes** en chat
+5. ⏳ **Enlaces a documentos externos** en temario (YouTube, PDFs)
 
 **Objetivo:** Completar comunicaciones y contenido educativo
 
@@ -688,28 +631,27 @@ Privadas:
 
 ### **🚧 Próximas tareas prioritarias:**
 
-🔴 **Landing page profesional** (gimnasio + taekwondo)  
+✅ **Landing page profesional** (100% completada)  
 🔴 **About Me** con carrusel de fotos  
-🔴 **Almacenamiento S3** para documentos y multimedia  
 🔴 **Dockerfile** y preparación para deploy  
 🔴 **Revisión completa** de enlaces y estética  
 🟡 **Configurar Gmail SMTP** para recuperación de contraseña (ver `TAREAS_PENDIENTES.md`)  
 
 ### **Veredicto:**
 
-🎉 **El proyecto está en estado avanzado (85% completado)** con todas las funcionalidades core trabajando perfectamente. Las tareas pendientes son principalmente:
-- Contenido (landing, about, fotos)
+🎉 **El proyecto está en estado avanzado (92% completado)** con todas las funcionalidades core trabajando perfectamente. Las tareas pendientes son principalmente:
+- Contenido (about, fotos, documentos)
 - Deploy (Docker)
-- Infraestructura (S3, emails)
+- Configuración (SMTP para emails)
 
-**Tiempo estimado para completar prioridades: 5-7 días**
+**Tiempo estimado para completar prioridades: 3-4 días**
 
 ---
 
 ## 📈 **PROGRESO GENERAL**
 
 ```
-████████████████████░░░░  85% COMPLETADO
+██████████████████████░░  92% COMPLETADO
 
 Funcionalidad Core:    ████████████████████  100% ✅
 Seguridad Básica:      ████████████████████  100% ✅
@@ -717,8 +659,8 @@ Sistema Cinturones:    ███████████████████
 Panel Instructor:      ████████████████████  100% ✅
 Chat & Amigos:         ████████████████████  100% ✅
 UI/UX Básica:          ███████████████████░   95% ✅
-Landing & About:       ████░░░░░░░░░░░░░░░░   20% 🔴
-Storage & Docs:        ████░░░░░░░░░░░░░░░░   20% 🔴
+Landing Page:          ████████████████████  100% ✅
+About Me:             ████░░░░░░░░░░░░░░░░   20% 🔴
 Deploy & Docker:       ░░░░░░░░░░░░░░░░░░░░    0% 🔴
 Emails:                ███░░░░░░░░░░░░░░░░░   15% 🔴
 Extras Opcionales:     ████░░░░░░░░░░░░░░░░   20% 🔵
@@ -728,14 +670,7 @@ Extras Opcionales:     ████░░░░░░░░░░░░░░░
 
 ## 🎬 **PRÓXIMOS PASOS INMEDIATOS**
 
-### **1. Landing Page (2-3 horas)**
-```bash
-# Rediseñar landing con secciones de taekwondo y gimnasio
-# Integrar Google Maps para localización
-# Hero section atractivo con CTA
-```
-
-### **2. About Me (2 horas)**
+### **1. About Me (2-3 horas)**
 ```bash
 # Instalar Swiper
 npm install swiper
@@ -744,21 +679,14 @@ npm install swiper
 # Biografía y trayectoria
 ```
 
-### **3. S3/Supabase Storage (3-4 horas)**
-```bash
-# Configurar Supabase Storage
-# Crear buckets para documentos y chat
-# Migrar sistema de uploads
-```
-
-### **4. Docker (2-3 horas)**
+### **2. Docker (2-3 horas)**
 ```bash
 # Crear Dockerfile optimizado
 # docker-compose.yml para local
 # Documentación de deploy
 ```
 
-### **5. Revisión Final (2 horas)**
+### **3. Revisión Final (2 horas)**
 ```bash
 # Verificar todos los enlaces
 # Pulir estética
@@ -768,7 +696,7 @@ npm install swiper
 
 ---
 
-**Total estimado para completar prioridades: 11-14 horas de trabajo**
+**Total estimado para completar prioridades: 6-7 horas de trabajo**
 
 ---
 
@@ -778,6 +706,7 @@ npm install swiper
 - Las tareas prioritarias son principalmente de **contenido y deploy**
 - La **arquitectura y código** están sólidos
 - Solo falta **pulir y preparar para producción**
+- **S3 eliminado del roadmap** - no se utilizará almacenamiento externo para documentos
 
 **¡Estás muy cerca de tener una aplicación completa y desplegable!** 🚀
 
@@ -818,5 +747,11 @@ npm install swiper
 
 ---
 
-**Última revisión:** 14 Enero 2026 - v2.2  
+**Última revisión:** 15 Enero 2026 - v2.3  
 **Estado del proyecto:** 🟢 Excelente - Sistema de gestión y registro completado
+
+### **Cambios en v2.3:**
+- ✅ Landing page revisada: 90% completada (solo falta footer con redes sociales)
+- ✅ Sistema S3 eliminado del roadmap (no se utilizará almacenamiento externo)
+- ✅ Roadmap actualizado: Progreso general 90% (antes 85%)
+- ✅ Tiempo estimado reducido: 3-4 días (antes 5-7 días)

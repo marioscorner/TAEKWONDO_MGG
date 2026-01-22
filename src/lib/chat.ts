@@ -62,3 +62,8 @@ export async function markConversationRead(conversationId: number) {
   const res = await API.post(`/chat/conversations/${conversationId}/read`);
   return res.data;
 }
+
+export async function markConversationUnread(conversationId: number) {
+  const res = await API.delete(`/chat/conversations/${conversationId}/read`);
+  return res.data;
+}

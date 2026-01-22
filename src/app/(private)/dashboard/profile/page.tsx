@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import API from "@/lib/api";
 import DeleteAccountButton from "@/components/profile/DeleteAccountButton";
+import { BELTS } from "@/lib/belt-colors";
 
 type UserProfile = {
   id: number;
@@ -97,13 +98,34 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     try {
-      await API.patch("/users/profile", formData);
+      // Convertir formData a objeto JSON (el endpoint espera JSON, no FormData)
+      // Enviar undefined en lugar de null para campos vacíos, o el valor si existe
+      const dataToSend: {
+        firstName?: string | null;
+        lastName?: string | null;
+        phone?: string | null;
+        belt?: string | null;
+      } = {};
+      
+      if (formData.firstName) dataToSend.firstName = formData.firstName;
+      else dataToSend.firstName = null;
+      
+      if (formData.lastName) dataToSend.lastName = formData.lastName;
+      else dataToSend.lastName = null;
+      
+      if (formData.phone) dataToSend.phone = formData.phone;
+      else dataToSend.phone = null;
+      
+      if (formData.belt) dataToSend.belt = formData.belt;
+      else dataToSend.belt = null;
+      
+      await API.patch("/users/profile", dataToSend);
       await loadProfile();
       setEditing(false);
-      alert("Perfil actualizado correctamente");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al actualizar perfil:", error);
-      alert("Error al actualizar el perfil");
+      const errorMessage = error.response?.data?.error || error.response?.data?.details?.[0]?.message || "Error al actualizar el perfil";
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -235,18 +257,11 @@ export default function ProfilePage() {
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="">Selecciona cinturón</option>
-                      <option value="Blanco">Blanco</option>
-                      <option value="Blanco-Amarillo">Blanco-Amarillo</option>
-                      <option value="Amarillo">Amarillo</option>
-                      <option value="Amarillo-Naranja">Amarillo-Naranja</option>
-                      <option value="Naranja">Naranja</option>
-                      <option value="Naranja-Verde">Naranja-Verde</option>
-                      <option value="Verde">Verde</option>
-                      <option value="Verde-Azul">Verde-Azul</option>
-                      <option value="Azul">Azul</option>
-                      <option value="Azul-Rojo">Azul-Rojo</option>
-                      <option value="Rojo">Rojo</option>
-                      <option value="Negro">Negro</option>
+                      {BELTS.map((belt) => (
+                        <option key={belt} value={belt}>
+                          {belt}
+                        </option>
+                      ))}
                     </select>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Solo instructores pueden editar cinturones

@@ -205,7 +205,9 @@ export default function TemarioPage() {
 
   const userBelt = profile?.belt || 'Blanco';
   const userLevel = getBeltLevel(userBelt);
-  const temarioItems = TEMARIO_BY_BELT[userBelt] || TEMARIO_BY_BELT['Blanco'];
+  // Si es un cinturón negro, usar el temario genérico de "Negro"
+  const beltKey = userBelt.startsWith('Negro') ? 'Negro' : userBelt;
+  const temarioItems = TEMARIO_BY_BELT[beltKey] || TEMARIO_BY_BELT['Blanco'];
 
   return (
     <div className="max-w-5xl mx-auto p-6">

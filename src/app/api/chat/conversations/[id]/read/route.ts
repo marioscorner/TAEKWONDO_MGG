@@ -49,3 +49,47 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 }
 
+// DELETE - Marcar conversación como no leída
+export async function DELETE(req: NextRequest, { params }: Params) {
+  const user = await requireAuth(req);
+  if (user instanceof NextResponse) return user;
+
+  try {
+    const resolvedParams = await params;
+    const conversationId = parseInt(resolvedParams.id);
+
+    if (isNaN(conversationId)) {
+      return NextResponse.json(
+        { error: 'ID de conversación inválido' },
+        { status: 400 }
+      );
+    }
+
+    // Establecer lastReadAt a null para marcar como no leído
+    const updated = await prisma.conversationParticipant.updateMany({
+      where: {
+        conversationId,
+        userId: user.userId,
+      },
+      data: {
+        lastReadAt: null,
+      },
+    });
+
+    if (updated.count === 0) {
+      return NextResponse.json(
+        { error: 'No eres participante de esta conversación' },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json({ message: 'Conversación marcada como no leída' });
+  } catch (error) {
+    console.error('Error al marcar como no leída:', error);
+    return NextResponse.json(
+      { error: 'Error al marcar como no leída' },
+      { status: 500 }
+    );
+  }
+}
+

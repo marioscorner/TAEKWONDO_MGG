@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { listConversations } from "@/lib/chat";
+import { listConversations, markConversationUnread } from "@/lib/chat";
 import { Friends } from "@/lib/friends";
 import API from "@/lib/api";
 import type { Conversation } from "@/types/chat";
@@ -104,6 +104,19 @@ export default function ChatsPage() {
     }
   };
 
+  // Marcar conversación como no leída
+  const handleMarkUnread = async (e: React.MouseEvent, conversationId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await markConversationUnread(conversationId);
+      await loadConversations(); // Recargar lista
+    } catch (error) {
+      console.error('Error al marcar como no leído:', error);
+      alert('Error al marcar como no leído');
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
@@ -196,33 +209,46 @@ export default function ChatsPage() {
                   .join(", ");
 
             return (
-              <Link
+              <div
                 key={c.id}
-                href={`/dashboard/chats/${c.id}`}
-                className="flex items-center justify-between gap-4 rounded border border-gray-200 dark:border-gray-700 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800 transition-colors"
+                className="group relative flex items-center justify-between gap-4 rounded border border-gray-200 dark:border-gray-700 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800 transition-colors"
               >
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium text-gray-900 dark:text-white">{title}</div>
-                  {c.last_message && (
-                    <div className="truncate text-sm text-gray-500 dark:text-gray-400">
-                      {c.last_message.sender.username}: {c.last_message.content}
-                    </div>
-                  )}
-                </div>
+                <Link
+                  href={`/dashboard/chats/${c.id}`}
+                  className="flex items-center justify-between gap-4 min-w-0 flex-1"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium text-gray-900 dark:text-white">{title}</div>
+                    {c.last_message && (
+                      <div className="truncate text-sm text-gray-500 dark:text-gray-400">
+                        {c.last_message.sender.username}: {c.last_message.content}
+                      </div>
+                    )}
+                  </div>
 
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  {c.unread_count > 0 && (
-                    <span className="rounded-full bg-blue-600 dark:bg-blue-500 px-2 py-0.5 text-xs font-semibold text-white">
-                      {c.unread_count}
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    {c.unread_count > 0 && (
+                      <span className="rounded-full bg-blue-600 dark:bg-blue-500 px-2 py-0.5 text-xs font-semibold text-white">
+                        {c.unread_count}
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                      {c.last_message
+                        ? formatTimeAgo(new Date(c.last_message.created_at))
+                        : ""}
                     </span>
-                  )}
-                  <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
-                    {c.last_message
-                      ? formatTimeAgo(new Date(c.last_message.created_at))
-                      : ""}
-                  </span>
-                </div>
-              </Link>
+                  </div>
+                </Link>
+                
+                {/* Botón para marcar como no leído */}
+                <button
+                  onClick={(e) => handleMarkUnread(e, c.id)}
+                  className="opacity-0 group-hover:opacity-100 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-all flex-shrink-0"
+                  title="Marcar como no leído"
+                >
+                  🔖
+                </button>
+              </div>
             );
           })}
         </div>

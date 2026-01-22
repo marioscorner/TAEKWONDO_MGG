@@ -166,25 +166,23 @@ export default function InstructorRegisterForm() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName">
-                Nombre <span className="text-red-500">*</span>
+                Nombre
               </Label>
               <Input
                 id="firstName"
                 name="firstName"
                 placeholder="Mario"
-                required
                 disabled={loading}
               />
             </div>
             <div>
               <Label htmlFor="lastName">
-                Apellidos <span className="text-red-500">*</span>
+                Apellidos
               </Label>
               <Input
                 id="lastName"
                 name="lastName"
                 placeholder="Gutiérrez"
-                required
                 disabled={loading}
               />
             </div>

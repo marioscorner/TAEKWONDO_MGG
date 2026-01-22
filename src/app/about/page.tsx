@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import profile from "../../../public/mario.jpeg";
+import photo1 from "../../../public/tkd_sek.webp";
+import photo2 from "../../../public/dq_mario.webp";
+import photo3 from "../../../public/MY_PHOTO.webp";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -9,11 +11,10 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 export default function About() {
-  // Placeholder images - el usuario añadirá las suyas
   const photos = [
-    { src: profile, alt: "Mario - Instructor de Taekwondo" },
-    // Añadir más fotos aquí cuando estén listas
-    // { src: "/path/to/photo2.jpg", alt: "Descripción" },
+    { src: photo1, alt: "Mario Gutiérrez - Práctica de Taekwondo" },
+    { src: photo2, alt: "Mario Gutiérrez - Taekwondo" },
+    { src: photo3, alt: "Mario Gutiérrez - Entrenamiento de Taekwondo" },
   ];
 
   return (
@@ -57,11 +58,6 @@ export default function About() {
               ))}
             </Swiper>
             
-            {photos.length === 1 && (
-              <p className="text-center mt-4 text-sm text-gray-500 dark:text-gray-400">
-                📸 Más fotos próximamente
-              </p>
-            )}
           </div>
 
           {/* Texto sobre mí */}

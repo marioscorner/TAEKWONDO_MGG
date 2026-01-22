@@ -29,8 +29,21 @@ export default function HeaderPrivate() {
   }, [user]);
 
   // Obtener color del username según cinturón (solo si es cinturón completo)
+  // En el header oscuro, necesitamos colores claros/brillantes
   const usernameColor = userBelt && isFullBelt(userBelt)
-    ? getBeltTextColor(userBelt)
+    ? (userBelt.startsWith('Negro') 
+        ? 'text-white' 
+        : userBelt === 'Rojo' 
+          ? 'text-red-300' 
+          : userBelt === 'Azul' 
+            ? 'text-blue-300' 
+            : userBelt === 'Verde' 
+              ? 'text-green-300' 
+              : userBelt === 'Naranja' 
+                ? 'text-orange-300' 
+                : userBelt === 'Amarillo' 
+                  ? 'text-yellow-300' 
+                  : 'text-blue-400')
     : 'text-blue-400';
 
   return (
@@ -39,7 +52,7 @@ export default function HeaderPrivate() {
         {/* Saludo al usuario donde estaba "Área privada" */}
         <div className="font-bold text-lg">
           {user ? (
-            <span>Bienvenido, <span className={usernameColor}>{user.username}</span> 🥋</span>
+            <span>Bienvenido, <span className={usernameColor || 'text-blue-400'}>{user.username}</span> 🥋</span>
           ) : (
             <span>Área privada 🥋</span>
           )}

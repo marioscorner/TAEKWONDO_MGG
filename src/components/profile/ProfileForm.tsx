@@ -58,8 +58,8 @@ export default function ProfileForm() {
 
     try {
       await updateProfile(data);
-      setMessage({ type: 'success', text: 'Perfil actualizado correctamente' });
       await loadProfile();
+      // Actualización silenciosa - sin mensaje de éxito
     } catch (error) {
       setMessage({ type: 'error', text: 'Error al actualizar el perfil' });
     } finally {

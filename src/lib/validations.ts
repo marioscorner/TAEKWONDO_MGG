@@ -27,11 +27,11 @@ export const refreshTokenSchema = z.object({
 // ============================================
 
 export const updateProfileSchema = z.object({
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  phone: z.string().optional(),
-  birthDate: z.string().datetime().optional(),
-  belt: z.string().optional(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  birthDate: z.string().datetime().nullable().optional(),
+  belt: z.string().nullable().optional(),
 });
 
 export const changePasswordSchema = z.object({

@@ -52,8 +52,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PUT - Actualizar perfil
+// PUT/PATCH - Actualizar perfil
 export async function PUT(req: NextRequest) {
+  return updateProfile(req);
+}
+
+export async function PATCH(req: NextRequest) {
+  return updateProfile(req);
+}
+
+async function updateProfile(req: NextRequest) {
   try {
     const user = await getUserFromRequest(req);
 
@@ -70,11 +78,11 @@ export async function PUT(req: NextRequest) {
     const updatedUser = await prisma.user.update({
       where: { id: user.userId },
       data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone,
-        birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
-        belt: data.belt,
+        firstName: data.firstName || null,
+        lastName: data.lastName || null,
+        phone: data.phone || null,
+        birthDate: data.birthDate ? new Date(data.birthDate) : null,
+        belt: data.belt || null,
       },
       select: {
         id: true,
