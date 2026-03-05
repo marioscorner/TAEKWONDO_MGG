@@ -78,7 +78,7 @@ flowchart TB
 | **API / Controladores** | Recibir request, decidir si requiere auth/rol, delegar en lógica y devolver respuesta | Route handlers en `src/app/api/**/route.ts`, `src/server/middleware/auth.ts` |
 | **Lógica de aplicación** | Validar entrada, aplicar reglas (ej. amistades ALUMNO), hashear contraseñas, firmar/verificar JWT | Zod, bcrypt, jose, código dentro de los route handlers |
 | **Acceso a datos** | Leer y escribir en la base de datos de forma estructurada | Prisma, `src/lib/prisma.ts`, modelos en `prisma/schema.prisma` |
-| **Persistencia y externos** | Almacenar datos y enviar correos | PostgreSQL (Supabase), Nodemailer (SMTP) |
+| **Persistencia y externos** | Almacenar datos y enviar correos | PostgreSQL, Nodemailer (SMTP) |
 
 ---
 

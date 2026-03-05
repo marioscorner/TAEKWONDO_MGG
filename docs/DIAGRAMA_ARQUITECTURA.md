@@ -52,7 +52,7 @@ flowchart TB
     end
 
     subgraph DATOS["Datos"]
-        PG[(PostgreSQL / Supabase)]
+        PG[(PostgreSQL)]
     end
 
     subgraph EXTERNO["Externo"]
@@ -103,7 +103,7 @@ flowchart LR
 | **Cliente** | Next.js (React 19), App Router, AuthContext, Axios con interceptor de tokens, Tailwind, Radix UI |
 | **Next.js servidor** | Páginas (públicas/privadas), API Routes bajo `/api/*` |
 | **Lógica de negocio** | Validación Zod, Prisma, JWT (jose), bcrypt, requireAuth/requireRole |
-| **Persistencia** | PostgreSQL (Supabase), tabla RefreshToken, PasswordResetToken, User, etc. |
+| **Persistencia** | PostgreSQL, tabla RefreshToken, PasswordResetToken, User, etc. |
 | **Externo** | Nodemailer (SMTP) para envío de emails de recuperación de contraseña |
 
 ---
