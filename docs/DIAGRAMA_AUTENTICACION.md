@@ -153,20 +153,20 @@ El usuario cierra sesión. El cliente envía el refresh token al backend para re
 ```mermaid
 sequenceDiagram
     participant U as Usuario
-    participant C as Componente (ej. Header)
+    participant C as Componente
     participant Ctx as AuthContext
-    participant API as POST /api/auth/logout
+    participant API as POST api auth logout
     participant DB as Base de datos
 
-    U->>C: Clic "Cerrar sesión"
-    C->>Ctx: logout()
-    Ctx->>API: POST /auth/logout { refresh } (desde localStorage)
-    API->>DB: refreshToken.updateMany({ token: refresh }, { revoked: true })
+    U->>C: Clic Cerrar sesión
+    C->>Ctx: logout
+    Ctx->>API: POST con refresh desde localStorage
+    API->>DB: refreshToken updateMany revoked true
     DB-->>API: OK
     API-->>Ctx: 200
-    Ctx->>Ctx: clearTokens() → removeItem access, refresh
-    Ctx->>Ctx: setUser(null)
-    Note over Ctx: Usuario deslogueado; rutas privadas redirigen a /login
+    Ctx->>Ctx: clearTokens removeItem access y refresh
+    Ctx->>Ctx: setUser null
+    Note over Ctx: Usuario deslogueado. Rutas privadas redirigen a login
 ```
 
 ---
@@ -176,14 +176,12 @@ sequenceDiagram
 Las rutas bajo el dashboard usan `PrivateRoute`. Si el usuario no está autenticado (y la carga inicial ha terminado), se redirige a `/login`.
 
 ```mermaid
-flowchart LR
-    subgraph PrivateRoute
-        A[Usuario accede a ruta privada] --> B{loading?}
-        B -->|Sí| C[Mostrar "Cargando..."]
-        B -->|No| D{user?}
-        D -->|No| E[router.push /login]
-        D -->|Sí| F[Renderizar children]
-    end
+flowchart TD
+    A[Usuario accede a ruta privada] --> B{loading}
+    B -->|Sí| C[Mostrar Cargando]
+    B -->|No| D{user}
+    D -->|No| E[Redirigir a login]
+    D -->|Sí| F[Renderizar children]
 ```
 
 ---
