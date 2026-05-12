@@ -7,6 +7,7 @@ import { listConversations, markConversationUnread } from "@/lib/chat";
 import { Friends } from "@/lib/friends";
 import API from "@/lib/api";
 import type { Conversation } from "@/types/chat";
+import { MessageCircle, RefreshCw, Search, Users } from "lucide-react";
 
 type Friend = {
   id: number;
@@ -43,7 +44,7 @@ export default function ChatsPage() {
       
       setConvs(sorted);
       setError(null);
-    } catch (e) {
+    } catch {
       setError("No se pudieron cargar las conversaciones.");
     } finally {
       setLoading(false);
@@ -99,7 +100,7 @@ export default function ChatsPage() {
         users: [friendId]
       });
       window.location.href = `/dashboard/chats/${res.data.id}`;
-    } catch (error) {
+    } catch {
       alert('Error al crear chat');
     }
   };
@@ -118,21 +119,27 @@ export default function ChatsPage() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Conversaciones</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 rounded-3xl bg-gradient-to-br from-slate-950 to-red-900 p-6 text-white shadow-martial sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div>
+          <div className="mb-3 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-100">Chat</div>
+          <h1 className="text-3xl font-bold tracking-tight">Conversaciones</h1>
+          <p className="mt-2 text-sm text-red-50">Mensajes actualizados por polling cada 5 segundos.</p>
+        </div>
         <button
           onClick={loadConversations}
           disabled={loading}
-          className="px-3 py-1 text-sm rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 text-gray-900 dark:text-white"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-red-800 transition hover:bg-red-50 disabled:opacity-50"
         >
+          <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} />
           {loading ? "Cargando..." : "Actualizar"}
         </button>
       </div>
 
       {/* Barra superior: Buscador y botón crear grupo */}
-      <div className="mb-6 flex gap-3">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row">
         <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             value={friendSearch}
@@ -143,10 +150,10 @@ export default function ChatsPage() {
             onFocus={() => setShowFriendResults(friendSearch.length >= 2)}
             onBlur={() => setTimeout(() => setShowFriendResults(false), 200)}
             placeholder="Buscar amigo para chatear..."
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+            className="min-h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-11 py-3 text-slate-950 outline-none transition focus:border-red-600 focus:ring-4 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-red-500 dark:focus:ring-red-950/40"
           />
           {showFriendResults && filteredFriends.length > 0 && (
-            <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+              <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900">
               {filteredFriends.map((f) => (
                 <button
                   key={f.id}
@@ -155,32 +162,32 @@ export default function ChatsPage() {
                     setFriendSearch("");
                     setShowFriendResults(false);
                   }}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 last:border-b-0 text-gray-900 dark:text-white"
+                  className="flex w-full items-center justify-between border-b border-slate-100 px-4 py-3 text-left text-slate-950 last:border-b-0 hover:bg-red-50 dark:border-slate-800 dark:text-white dark:hover:bg-red-950/30"
                 >
                   <span className="font-medium">{f.friend.username}</span>
-                  <span className="text-sm text-blue-600 dark:text-blue-400">💬 Abrir chat</span>
+                  <span className="text-sm font-semibold text-red-700 dark:text-red-300">Abrir chat</span>
                 </button>
               ))}
             </div>
           )}
           {showFriendResults && filteredFriends.length === 0 && friendSearch.length >= 2 && (
-            <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 text-center text-gray-500 dark:text-gray-400">
+            <div className="absolute z-10 mt-2 w-full rounded-xl border border-slate-200 bg-white p-4 text-center text-slate-500 shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
               No se encontraron amigos
             </div>
           )}
         </div>
         <Link
           href="/dashboard/chats/create-group"
-          className="px-4 py-3 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-lg font-medium whitespace-nowrap transition-colors"
+          className="inline-flex min-h-12 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-slate-950 px-4 py-3 font-semibold text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
         >
-          👥 Crear Grupo
+          <Users className="size-4" /> Crear grupo
         </Link>
       </div>
 
       {loading && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-14 animate-pulse rounded bg-gray-100 dark:bg-gray-700" />
+            <div key={i} className="h-20 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
           ))}
         </div>
       )}
@@ -192,14 +199,14 @@ export default function ChatsPage() {
       )}
 
       {!loading && !error && convs.length === 0 && (
-        <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
           <p className="mb-2">Aún no tienes conversaciones.</p>
           <p className="text-sm">Añade amigos para comenzar a chatear.</p>
         </div>
       )}
 
       {!loading && !error && convs.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {convs.map((c) => {
             const title = c.is_group
               ? c.name || `Grupo #${c.id}`
@@ -211,28 +218,35 @@ export default function ChatsPage() {
             return (
               <div
                 key={c.id}
-                className="group relative flex items-center justify-between gap-4 rounded border border-gray-200 dark:border-gray-700 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 bg-white dark:bg-gray-800 transition-colors"
+                className="group relative flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-red-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-red-900"
               >
                 <Link
                   href={`/dashboard/chats/${c.id}`}
                   className="flex items-center justify-between gap-4 min-w-0 flex-1"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium text-gray-900 dark:text-white">{title}</div>
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-full bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300">
+                        <MessageCircle className="size-5" />
+                      </div>
+                      <div className="min-w-0">
+                    <div className="truncate font-bold text-slate-950 dark:text-white">{title}</div>
                     {c.last_message && (
-                      <div className="truncate text-sm text-gray-500 dark:text-gray-400">
+                      <div className="truncate text-sm text-slate-500 dark:text-slate-400">
                         {c.last_message.sender.username}: {c.last_message.content}
                       </div>
                     )}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-3 flex-shrink-0">
                     {c.unread_count > 0 && (
-                      <span className="rounded-full bg-blue-600 dark:bg-blue-500 px-2 py-0.5 text-xs font-semibold text-white">
+                      <span className="rounded-full bg-red-700 px-2.5 py-1 text-xs font-bold text-white dark:bg-red-600">
                         {c.unread_count}
                       </span>
                     )}
-                    <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                    <span className="whitespace-nowrap text-xs text-slate-400 dark:text-slate-500">
                       {c.last_message
                         ? formatTimeAgo(new Date(c.last_message.created_at))
                         : ""}
@@ -243,7 +257,7 @@ export default function ChatsPage() {
                 {/* Botón para marcar como no leído */}
                 <button
                   onClick={(e) => handleMarkUnread(e, c.id)}
-                  className="opacity-0 group-hover:opacity-100 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-all flex-shrink-0"
+                  className="hidden rounded-lg px-2 py-1 text-xs text-slate-500 transition-all hover:bg-red-50 hover:text-red-700 dark:text-slate-400 dark:hover:bg-red-950/30 dark:hover:text-red-300 sm:block sm:opacity-0 sm:group-hover:opacity-100"
                   title="Marcar como no leído"
                 >
                   🔖

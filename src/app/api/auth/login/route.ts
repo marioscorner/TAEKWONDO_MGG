@@ -15,12 +15,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = loginSchema.parse(body);
 
-    const email = sanitizeEmail(data.email);
+    const login = data.email.trim();
+    const email = login.includes('@') ? sanitizeEmail(login) : null;
 
-    // Buscar usuario
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    // Buscar usuario por email o username para mantener compatibilidad con credenciales previas.
+    const user = email
+      ? await prisma.user.findUnique({ where: { email } })
+      : await prisma.user.findUnique({ where: { username: login } });
 
     if (!user || !(await verifyPassword(data.password, user.password))) {
       return NextResponse.json(
@@ -75,4 +76,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

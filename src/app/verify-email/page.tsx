@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { confirmEmailVerify } from "@/lib/auth"; // existe en tu src/lib/auth.ts
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const sp = useSearchParams();
   const router = useRouter();
   const uid = Number(sp.get("uid"));
@@ -49,5 +49,13 @@ export default function VerifyEmailPage() {
         Volver al inicio
       </button>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<p className="p-6">Verificando…</p>}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

@@ -63,13 +63,16 @@ export default function RegisterForm() {
       setTimeout(() => {
         router.push("/login?registered=true");
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error en registro:", err);
+      const response = typeof err === "object" && err !== null && "response" in err
+        ? (err as { response?: { data?: { error?: string }; status?: number } }).response
+        : undefined;
       
       // Mostrar error específico del servidor
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else if (err.response?.status === 400) {
+      if (response?.data?.error) {
+        setError(response.data.error);
+      } else if (response?.status === 400) {
         setError("El email o nombre de usuario ya está registrado");
       } else {
         setError("Error al crear la cuenta. Intenta de nuevo.");
@@ -81,7 +84,7 @@ export default function RegisterForm() {
 
   if (success) {
     return (
-      <Card className="mx-auto max-w-sm">
+      <Card className="mx-auto max-w-sm border-slate-200 shadow-lg dark:border-slate-800">
         <CardHeader>
           <CardTitle className="text-green-600">¡Cuenta creada!</CardTitle>
           <CardDescription>
@@ -93,7 +96,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <Card className="mx-auto max-w-sm">
+    <Card className="mx-auto max-w-sm border-slate-200 shadow-lg dark:border-slate-800">
       <CardHeader>
         <CardTitle>Crear cuenta</CardTitle>
         <CardDescription>
@@ -203,7 +206,7 @@ export default function RegisterForm() {
           {/* Link a login */}
           <div className="mt-4 text-center text-sm">
             ¿Ya tienes cuenta?{" "}
-            <a href="/login" className="underline underline-offset-4 text-blue-600 hover:text-blue-700 dark:text-blue-400">
+            <a href="/login" className="font-semibold text-red-700 underline underline-offset-4 hover:text-red-900 dark:text-red-300">
               Inicia sesión
             </a>
           </div>

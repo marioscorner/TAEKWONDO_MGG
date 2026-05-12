@@ -20,11 +20,11 @@ type UserProfile = {
 };
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
@@ -66,33 +66,44 @@ export default function ProfilePage() {
         alert("La imagen no puede superar los 5MB");
         return;
       }
+      
+      // Mostrar preview inmediatamente
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
       setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
-    }
-  };
+      
+      // Subir automáticamente
+      setUploadingAvatar(true);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("type", "avatar");
 
-  const handleUploadAvatar = async () => {
-    if (!avatarFile) return;
+        const res = await API.post("/upload/image", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
-    setUploadingAvatar(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", avatarFile);
-      formData.append("type", "avatar");
-
-      const res = await API.post("/upload/image", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setAvatarPreview(res.data.url);
-      setAvatarFile(null);
-      await loadProfile();
-      alert("Avatar actualizado correctamente");
-    } catch (error) {
-      console.error("Error al subir avatar:", error);
-      alert("Error al subir el avatar");
-    } finally {
-      setUploadingAvatar(false);
+        // Actualizar con la URL real del servidor
+        if (res.data.url) {
+          // Limpiar el preview temporal
+          URL.revokeObjectURL(previewUrl);
+          setAvatarPreview(res.data.url);
+          setProfile(prev => prev ? { ...prev, avatarUrl: res.data.url } : null);
+        }
+        
+        setAvatarFile(null);
+        
+        // Recargar el perfil completo para asegurar sincronización
+        await loadProfile();
+      } catch (error: unknown) {
+        console.error("Error al subir avatar:", error);
+        const errorMessage = getApiErrorMessage(error, "Error al subir el avatar");
+        alert(`Error: ${errorMessage}`);
+        // Revertir preview en caso de error
+        setAvatarPreview(profile?.avatarUrl || null);
+      } finally {
+        setUploadingAvatar(false);
+      }
     }
   };
 
@@ -122,9 +133,9 @@ export default function ProfilePage() {
       await API.patch("/users/profile", dataToSend);
       await loadProfile();
       setEditing(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al actualizar perfil:", error);
-      const errorMessage = error.response?.data?.error || error.response?.data?.details?.[0]?.message || "Error al actualizar el perfil";
+      const errorMessage = getApiErrorMessage(error, "Error al actualizar el perfil");
       alert(`Error: ${errorMessage}`);
     }
   };
@@ -146,22 +157,36 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Mi Perfil</h1>
+    <div className="space-y-6">
+      <section className="rounded-3xl bg-gradient-to-br from-slate-950 to-red-900 p-6 text-white shadow-martial sm:p-8">
+        <div className="flex flex-col items-center text-center">
+          {avatarPreview ? (
+            <img src={avatarPreview} alt="Avatar" className="size-32 rounded-full border-4 border-white/80 object-cover shadow-xl" />
+          ) : (
+            <div className="grid size-32 place-items-center rounded-full border-4 border-white/40 bg-white/10 text-6xl shadow-xl">👤</div>
+          )}
+          <h1 className="mt-4 text-3xl font-bold tracking-tight">{profile.username}</h1>
+          <p className="mt-1 text-sm text-red-50">{profile.email}</p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-red-800">{profile.belt || "Sin cinturón"}</span>
+            <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm font-bold text-white">{profile.role === "ALUMNO" ? "Alumno" : profile.role}</span>
+          </div>
+        </div>
+      </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* Columna izquierda: Avatar */}
         <div className="md:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex flex-col items-center">
               {avatarPreview ? (
                 <img
                   src={avatarPreview}
                   alt="Avatar"
-                  className="w-40 h-40 rounded-full object-cover border-4 border-blue-500 dark:border-blue-400 mb-4"
+                  className="mb-4 size-40 rounded-full border-4 border-red-700 object-cover dark:border-red-500"
                 />
               ) : (
-                <div className="w-40 h-40 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-6xl mb-4">
+                <div className="mb-4 flex size-40 items-center justify-center rounded-full bg-slate-100 text-6xl dark:bg-slate-800">
                   👤
                 </div>
               )}
@@ -169,23 +194,22 @@ export default function ProfilePage() {
               <h2 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">{profile.username}</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{profile.email}</p>
               
-              <div className="w-full space-y-3">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="w-full text-sm text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
-                />
-                {avatarFile && (
-                  <button
-                    onClick={handleUploadAvatar}
+              {editing && (
+                <div className="w-full space-y-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
                     disabled={uploadingAvatar}
-                    className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
-                  >
-                    {uploadingAvatar ? "Subiendo..." : "Subir Avatar"}
-                  </button>
-                )}
-              </div>
+                    className="w-full text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-red-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-red-700 hover:file:bg-red-100 disabled:opacity-50 dark:text-white dark:file:bg-red-950/40 dark:file:text-red-300"
+                  />
+                  {uploadingAvatar && (
+                    <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                      Subiendo imagen...
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="mt-4 w-full">
                 <div className="text-center">
@@ -206,13 +230,13 @@ export default function ProfilePage() {
 
         {/* Columna derecha: Información */}
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Información Personal</h2>
               {!editing && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium"
+                  className="min-h-11 rounded-lg bg-red-700 px-4 py-2 font-semibold text-white transition hover:bg-red-900 dark:bg-red-600 dark:hover:bg-red-500"
                 >
                   ✏️ Editar
                 </button>
@@ -227,7 +251,7 @@ export default function ProfilePage() {
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="min-h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2 text-slate-950 outline-none transition focus:border-red-600 focus:ring-4 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-red-500 dark:focus:ring-red-950/40"
                   />
                 </div>
                 <div>
@@ -236,7 +260,7 @@ export default function ProfilePage() {
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="min-h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2 text-slate-950 outline-none transition focus:border-red-600 focus:ring-4 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-red-500 dark:focus:ring-red-950/40"
                   />
                 </div>
                 <div>
@@ -245,7 +269,7 @@ export default function ProfilePage() {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="min-h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2 text-slate-950 outline-none transition focus:border-red-600 focus:ring-4 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-red-500 dark:focus:ring-red-950/40"
                   />
                 </div>
                 {(profile.role === 'INSTRUCTOR' || profile.role === 'ADMIN') && (
@@ -254,7 +278,7 @@ export default function ProfilePage() {
                     <select
                       value={formData.belt}
                       onChange={(e) => setFormData({ ...formData, belt: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="min-h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2 text-slate-950 outline-none transition focus:border-red-600 focus:ring-4 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-red-500 dark:focus:ring-red-950/40"
                     >
                       <option value="">Selecciona cinturón</option>
                       {BELTS.map((belt) => (
@@ -280,13 +304,13 @@ export default function ProfilePage() {
                         belt: profile.belt || "",
                       });
                     }}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-gray-900 dark:text-white"
+                    className="min-h-11 flex-1 rounded-lg border-2 border-slate-200 px-4 py-2 font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:text-white dark:hover:bg-slate-800"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleSave}
-                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-lg font-medium"
+                    className="min-h-11 flex-1 rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700"
                   >
                     💾 Guardar
                   </button>
@@ -322,7 +346,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Zona peligrosa */}
-          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl p-6">
+          <div className="rounded-2xl border-2 border-red-200 bg-red-50 p-6 dark:border-red-900/70 dark:bg-red-950/20">
             <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4">⚠️ Zona Peligrosa</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
               Una vez elimines tu cuenta, no hay vuelta atrás. Todos tus datos se eliminarán permanentemente.
@@ -333,4 +357,12 @@ export default function ProfilePage() {
       </div>
     </div>
   );
+}
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (typeof error === "object" && error !== null && "response" in error) {
+    const response = (error as { response?: { data?: { error?: string; details?: { message?: string }[] } } }).response;
+    return response?.data?.error || response?.data?.details?.[0]?.message || fallback;
+  }
+  return fallback;
 }

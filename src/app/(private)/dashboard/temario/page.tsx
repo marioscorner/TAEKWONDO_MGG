@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import API from "@/lib/api";
 import { getBeltLevel, getBeltBadgeClass, BELTS } from "@/lib/belt-colors";
-import Link from "next/link";
+import { BookOpen, CheckCircle2, Lock, PlayCircle } from "lucide-react";
 
 type UserProfile = {
   belt?: string;
@@ -210,32 +210,28 @@ export default function TemarioPage() {
   const temarioItems = TEMARIO_BY_BELT[beltKey] || TEMARIO_BY_BELT['Blanco'];
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <Link
-          href="/dashboard"
-          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-500 font-medium mb-4 inline-block"
-        >
-          ← Volver al Dashboard
-        </Link>
-        <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">🥋 Temario de Taekwondo</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Contenido específico para tu nivel actual
+    <div className="space-y-6">
+      <div className="rounded-3xl bg-gradient-to-br from-slate-950 to-red-900 p-6 text-white shadow-martial sm:p-8">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15">
+          <BookOpen className="size-6" />
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Temario de Taekwondo</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-red-50 sm:text-base">
+          Materiales organizados para tu cinturón actual. Enfócate en completar cada técnica antes de avanzar.
         </p>
       </div>
 
       {/* Cinturón actual */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-8 border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Tu Cinturón Actual</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <h2 className="text-2xl font-bold text-slate-950 dark:text-white">Tu cinturón actual</h2>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               {profile?.firstName} {profile?.lastName || user?.username}
             </p>
           </div>
           <div>
-            <span className={`px-6 py-3 rounded-lg text-xl font-bold ${getBeltBadgeClass(userBelt)}`}>
+            <span className={`inline-flex rounded-xl px-5 py-3 text-lg font-bold shadow-sm ${getBeltBadgeClass(userBelt)}`}>
               {userBelt}
             </span>
           </div>
@@ -243,23 +239,35 @@ export default function TemarioPage() {
       </div>
 
       {/* Temario para tu nivel */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-8 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">📚 Contenido para Cinturón {userBelt}</h2>
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-950 dark:text-white">Contenido para {userBelt}</h2>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Clases presenciales como base, material digital como refuerzo.</p>
+          </div>
+          <div className="hidden rounded-full bg-red-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-red-700 dark:bg-red-950/40 dark:text-red-300 sm:block">
+            Actual
+          </div>
+        </div>
         <div className="space-y-4">
           {temarioItems.map((item, index) => (
             <div
               key={index}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-500 dark:hover:border-blue-400 transition-colors bg-white dark:bg-gray-700/50"
+              className="flex gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:border-red-200 hover:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-red-900 dark:hover:bg-slate-900"
             >
-              <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">{item.title}</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-3">{item.description}</p>
-              <div className="flex gap-2">
+              <div className="mt-1 grid size-10 shrink-0 place-items-center rounded-xl bg-red-700 text-white">
+                <PlayCircle className="size-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+              <h3 className="text-lg font-bold text-slate-950 dark:text-white">{item.title}</h3>
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
                 {item.videoUrl && (
                   <a
                     href={item.videoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1 bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 text-white text-sm rounded"
+                    className="rounded-lg bg-red-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-900 dark:bg-red-600 dark:hover:bg-red-500"
                   >
                     📹 Ver Video
                   </a>
@@ -269,16 +277,18 @@ export default function TemarioPage() {
                     href={item.pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white text-sm rounded"
+                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700"
                   >
                     📄 Descargar PDF
                   </a>
                 )}
                 {!item.videoUrl && !item.pdfUrl && (
-                  <span className="text-sm text-gray-500 dark:text-gray-400 italic">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:ring-slate-800">
+                    <Lock className="size-3.5" />
                     Contenido disponible en clases presenciales
                   </span>
                 )}
+              </div>
               </div>
             </div>
           ))}
@@ -286,9 +296,9 @@ export default function TemarioPage() {
       </div>
 
       {/* Progreso general */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">🎯 Tu Progreso</h2>
-        <div className="space-y-3">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <h2 className="text-2xl font-bold text-slate-950 dark:text-white">Tu progreso</h2>
+        <div className="mt-6 space-y-3">
           {BELTS.map((belt, index) => {
             const isPassed = index < userLevel;
             const isCurrent = index === userLevel;
@@ -297,20 +307,20 @@ export default function TemarioPage() {
             return (
               <div
                 key={belt}
-                className={`flex items-center gap-4 p-3 rounded-lg ${
-                  isCurrent ? 'bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 dark:border-blue-400' :
-                  isPassed ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' :
-                  isNext ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' :
-                  'bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                className={`flex items-center gap-4 rounded-xl p-3 ${
+                  isCurrent ? 'border-2 border-red-600 bg-red-50 dark:border-red-500 dark:bg-red-950/30' :
+                  isPassed ? 'border border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/20' :
+                  isNext ? 'border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20' :
+                  'border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40'
                 }`}
               >
                 <span className={`px-4 py-2 rounded text-sm font-bold ${getBeltBadgeClass(belt)}`}>
                   {belt}
                 </span>
                 <div className="flex-1">
-                  {isCurrent && <span className="text-blue-600 dark:text-blue-400 font-semibold">← Tu nivel actual</span>}
-                  {isPassed && <span className="text-green-600 dark:text-green-400">✓ Completado</span>}
-                  {isNext && <span className="text-yellow-600 dark:text-yellow-400">→ Próximo objetivo</span>}
+                  {isCurrent && <span className="font-semibold text-red-700 dark:text-red-300">Nivel actual</span>}
+                  {isPassed && <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300"><CheckCircle2 className="size-4" /> Completado</span>}
+                  {isNext && <span className="text-amber-700 dark:text-amber-300">Próximo objetivo</span>}
                 </div>
               </div>
             );

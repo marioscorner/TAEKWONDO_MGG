@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/server/middleware/auth';
 import { sendMessageSchema } from '@/lib/validations';
+import { emitToConversation } from '@/lib/socket';
 import { ZodError } from 'zod';
 
 type Params = { params: Promise<{ id: string }> };
@@ -207,27 +208,36 @@ export async function POST(req: NextRequest, { params }: Params) {
       data: { updatedAt: new Date() },
     });
 
-    return NextResponse.json(
-      {
-        id: message.id,
-        content: message.content,
-        created_at: message.createdAt.toISOString(),
-        sender: message.sender,
-        conversation: message.conversationId,
-      },
-      { status: 201 }
-    );
+    const payload = {
+      id: message.id,
+      content: message.content,
+      created_at: message.createdAt.toISOString(),
+      sender: message.sender,
+      conversation: message.conversationId,
+    };
+
+    emitToConversation(conversationId, 'message.new', payload);
+
+    return NextResponse.json(payload, { status: 201 });
   } catch (error) {
     if (error instanceof ZodError) {
+      console.error('❌ Error de validación:', error.errors);
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
 
-    console.error('Error al enviar mensaje:', error);
+    console.error('❌ Error al enviar mensaje:', error);
+    if (error instanceof Error) {
+      console.error('   Mensaje:', error.message);
+      console.error('   Stack:', error.stack);
+    }
     return NextResponse.json(
-      { error: 'Error al enviar mensaje' },
+      { 
+        error: 'Error al enviar mensaje',
+        details: error instanceof Error ? error.message : 'Error desconocido'
+      },
       { status: 500 }
     );
   }

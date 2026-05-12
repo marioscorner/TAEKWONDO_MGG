@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/server/middleware/auth';
 import { prisma } from '@/lib/prisma';
 import { writeFile } from 'fs/promises';
+import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
 
@@ -50,9 +51,8 @@ export async function POST(req: NextRequest) {
     const filePath = join(uploadDir, filename);
     
     // Crear directorio si no existe
-    const fs = require('fs');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, { recursive: true });
     }
     
     await writeFile(filePath, buffer);
@@ -77,4 +77,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

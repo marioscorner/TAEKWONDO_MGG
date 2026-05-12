@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/context/ThemeContext";
-import { getBeltTextColor, isFullBelt } from "@/lib/belt-colors";
+import { isFullBelt } from "@/lib/belt-colors";
 import { useEffect, useState } from "react";
 import API from "@/lib/api";
 

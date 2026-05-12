@@ -223,20 +223,20 @@ npm install react-icons
 - [x] Integrar con `nodemailer`
 - [x] Modelo `PasswordResetToken` en BD
 - [x] Link "¿Olvidaste tu contraseña?" en login
-- [x] Documentación completa (`CONFIGURACION_EMAIL.md`)
+- [x] Documentación completa (`docs/EMAIL_SETUP.md`)
 - [ ] **⏳ PENDIENTE: Configurar servicio SMTP (Gmail):**
   - [ ] Habilitar verificación en 2 pasos en Gmail
   - [ ] Crear contraseña de aplicación
   - [ ] Añadir variables SMTP a `.env.local`
   - [ ] Probar envío de emails
-  - [ ] Ver guía en: `CONFIGURACION_EMAIL.md`
+  - [ ] Ver guía en: `docs/EMAIL_SETUP.md`
 
 **Archivos creados:**
 ```
 ✅ src/lib/email.ts                           (servicio completo)
 ✅ src/app/reset-password/page.tsx            (solicitud)
 ✅ src/app/reset-password/confirm/page.tsx     (confirmación)
-✅ CONFIGURACION_EMAIL.md                      (guía SMTP)
+✅ docs/EMAIL_SETUP.md                         (guía SMTP)
 ✅ RECUPERACION_PASSWORD_COMPLETADO.md         (documentación)
 ✅ TAREAS_PENDIENTES.md                        (recordatorio)
 ```
@@ -742,7 +742,7 @@ npm install swiper
 - ✅ Amistad automática: Con todos los alumnos existentes
 - ✅ UI destacada: Campo de contraseña secreta resaltado
 - ✅ Links útiles: Desde registro normal y hacia login
-- ✅ Documentación completa: `REGISTRO_INSTRUCTOR.md`
+- ✅ Documentación completa: `docs/INSTRUCTOR_REGISTRATION.md`
 - ⏳ **Pendiente:** Configurar variable `INSTRUCTOR_SECRET_PASSWORD` en `.env.local`
 
 ---

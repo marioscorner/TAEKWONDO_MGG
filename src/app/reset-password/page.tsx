@@ -24,8 +24,11 @@ export default function RequestResetPasswordPage() {
     try {
       await API.post("/auth/password/request-reset", { email });
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Error al solicitar recuperación");
+    } catch (err: unknown) {
+      const response = typeof err === "object" && err !== null && "response" in err
+        ? (err as { response?: { data?: { error?: string } } }).response
+        : undefined;
+      setError(response?.data?.error || "Error al solicitar recuperación");
     } finally {
       setLoading(false);
     }

@@ -55,7 +55,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="border-slate-200 shadow-lg dark:border-slate-800">
         <CardHeader>
           <CardTitle>Iniciar sesión</CardTitle>
           <CardDescription>Ingresa tus credenciales para acceder a tu cuenta</CardDescription>
@@ -71,12 +71,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
             {/* Email */}
             <div className="grid gap-3">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email o usuario</Label>
               <Input
                 id="email"
                 name="email"
-                type="email"
-                placeholder="tu@email.com"
+                type="text"
+                placeholder="tu@email.com o tu usuario"
                 required
                 disabled={pending}
               />
@@ -88,7 +88,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 <Label htmlFor="password">Contraseña</Label>
                 <a
                   href="/reset-password"
-                  className="text-xs text-blue-600 hover:underline"
+                  className="text-xs font-semibold text-red-700 hover:underline dark:text-red-300"
                 >
                   ¿Olvidaste tu contraseña?
                 </a>
@@ -119,14 +119,14 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             <div className="space-y-2">
               <div className="text-center text-sm">
                 ¿No tienes una cuenta?{" "}
-                <a href="/register" className="text-blue-600 hover:underline dark:text-blue-400">
+                <a href="/register" className="font-semibold text-red-700 hover:underline dark:text-red-300">
                   Regístrate
                 </a>
               </div>
               
               <div className="text-center text-sm">
                 ¿Eres instructor?{" "}
-                <a href="/register/instructor" className="text-blue-600 hover:underline dark:text-blue-400">
+                <a href="/register/instructor" className="font-semibold text-red-700 hover:underline dark:text-red-300">
                   Regístrate aquí
                 </a>
               </div>

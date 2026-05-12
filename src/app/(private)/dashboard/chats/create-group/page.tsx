@@ -102,9 +102,12 @@ export default function CreateGroupPage() {
       });
 
       router.push(`/dashboard/chats/${res.data.id}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al crear grupo:", error);
-      setError(error.response?.data?.error || "Error al crear el grupo");
+      const response = typeof error === "object" && error !== null && "response" in error
+        ? (error as { response?: { data?: { error?: string } } }).response
+        : undefined;
+      setError(response?.data?.error || "Error al crear el grupo");
     } finally {
       setLoading(false);
     }
@@ -230,4 +233,3 @@ export default function CreateGroupPage() {
     </div>
   );
 }
-

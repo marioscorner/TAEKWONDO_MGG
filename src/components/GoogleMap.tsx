@@ -14,9 +14,6 @@ export default function GoogleMap({
   height = "400", 
   className = "" 
 }: GoogleMapProps) {
-  // Construir URL del iframe de Google Maps
-  const mapUrl = `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}&q=${encodeURIComponent(location)}`;
-
   // URL alternativa sin API key (menos features pero funciona)
   const simpleMapUrl = `https://www.google.com/maps?q=${encodeURIComponent(location)}&output=embed`;
 
@@ -36,4 +33,3 @@ export default function GoogleMap({
     </div>
   );
 }
-

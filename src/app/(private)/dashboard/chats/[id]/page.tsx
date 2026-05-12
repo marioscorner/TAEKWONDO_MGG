@@ -8,6 +8,7 @@ import { useChatSocket } from "@/hooks/useChatSocket";
 import { listMessages, listMessagesPage, markConversationRead, getConversation } from "@/lib/chat";
 import type { Message, Conversation, MessagesPage } from "@/types/chat";
 import Link from "next/link";
+import { ArrowLeft, Send } from "lucide-react";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -65,13 +66,6 @@ export default function ChatDetailPage({ params }: PageProps) {
           setMessages(sorted);
           setNextCursor(page.next);
           
-          // Actualizar último ID conocido
-          if (asc.length > 0) {
-            const lastMsg = asc[asc.length - 1];
-            if (lastMsg.id) {
-              (useChatSocket as any).lastMessageIdRef = lastMsg.id;
-            }
-          }
         }
         await markConversationRead(conversationId);
         
@@ -202,7 +196,7 @@ export default function ChatDetailPage({ params }: PageProps) {
   }
 
   if (loadingConv || loadingMsgs) {
-    return <div className="p-6">Cargando…</div>;
+    return <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Cargando…</div>;
   }
 
   if (error) {
@@ -219,25 +213,25 @@ export default function ChatDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-160px)] flex-col rounded-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+    <div className="flex h-[calc(100vh-7rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:h-[calc(100vh-4rem)]">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-3 bg-gray-50 dark:bg-gray-900">
+      <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-slate-950 to-red-900 px-4 py-3 text-white dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <Link href="/dashboard/chats" className="text-sm text-blue-600 dark:text-blue-400 underline">
-            ← Volver
+          <Link href="/dashboard/chats" className="grid size-10 place-items-center rounded-full bg-white/10 transition hover:bg-white/20" aria-label="Volver a conversaciones">
+            <ArrowLeft className="size-5" />
           </Link>
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h1>
+          <h1 className="text-lg font-bold">{title}</h1>
         </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{connected ? "Conectado" : "Reconectando..."}</div>
+        <div className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-red-50">{connected ? "Conectado" : "Reconectando..."}</div>
       </div>
 
       {/* Mensajes */}
-      <div ref={listRef} className="flex-1 space-y-2 overflow-auto p-4 bg-white dark:bg-gray-800">
+      <div ref={listRef} className="flex-1 space-y-3 overflow-auto bg-slate-50 p-4 dark:bg-slate-950/60">
         {/* Cargar más */}
         {nextCursor && (
           <div className="mb-2 flex justify-center">
             <button
-              className="rounded bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-sm hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100"
+              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-red-50 hover:text-red-700 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-800 dark:hover:bg-red-950/30"
               onClick={handleLoadMore}
             >
               Cargar mensajes anteriores
@@ -250,17 +244,18 @@ export default function ChatDetailPage({ params }: PageProps) {
           return (
             <div
               key={m.id}
-              className={`max-w-[80%] rounded px-3 py-2 ${
+              className={`max-w-[82%] rounded-2xl px-4 py-2.5 shadow-sm ${
                 mine 
-                  ? "ml-auto bg-blue-50 dark:bg-blue-900/30 text-gray-900 dark:text-gray-100" 
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  ? "ml-auto rounded-br-md bg-red-700 text-white dark:bg-red-600" 
+                  : "rounded-bl-md bg-white text-slate-950 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-800"
               }`}
             >
-              {!mine && <div className="text-xs text-gray-500 dark:text-gray-400">{m.sender?.username}</div>}
-              <div>{m.content}</div>
+              {!mine && <div className="mb-1 text-xs font-semibold text-red-700 dark:text-red-300">{m.sender?.username}</div>}
+              <div className="text-sm leading-6">{m.content}</div>
+              
               {/* ✓✓ en 1:1 si el backend devuelve seen_by_other */}
               {typeof m.seen_by_other === "boolean" && mine && (
-                <div className="mt-1 text-[10px] text-gray-400 dark:text-gray-500">{m.seen_by_other ? "Visto ✓✓" : "Enviado"}</div>
+                <div className="mt-1 text-[10px] text-red-100">{m.seen_by_other ? "Visto ✓✓" : "Enviado"}</div>
               )}
             </div>
           );
@@ -269,11 +264,11 @@ export default function ChatDetailPage({ params }: PageProps) {
 
       {/* Typing indicator - solo mostrar si NO es el usuario actual escribiendo */}
       {typingIds.filter(id => id !== user?.id && id !== 0).length > 0 && (
-        <div className="px-4 pb-2 text-xs text-gray-500 dark:text-gray-400">Escribiendo…</div>
+        <div className="bg-slate-50 px-4 pb-2 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">Escribiendo…</div>
       )}
 
       {/* Input */}
-      <div className="flex items-center gap-2 border-t border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-900">
+      <div className="flex items-center gap-2 border-t border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
         <textarea
           ref={inputRef}
           value={text}
@@ -294,13 +289,14 @@ export default function ChatDetailPage({ params }: PageProps) {
           }}
           rows={1}
           placeholder="Escribe un mensaje…"
-          className="flex-1 resize-none rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+          className="min-h-11 flex-1 resize-none rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-slate-950 outline-none transition focus:border-red-600 focus:ring-4 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-red-500 dark:focus:ring-red-950/40"
         />
         <button
           onClick={handleSend}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+          className="grid size-11 place-items-center rounded-xl bg-red-700 text-white transition hover:bg-red-900 dark:bg-red-600 dark:hover:bg-red-500"
+          aria-label="Enviar mensaje"
         >
-          Enviar
+          <Send className="size-5" />
         </button>
       </div>
     </div>

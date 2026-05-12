@@ -1,8 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-// ¡AHORA USA EL BACKEND INTEGRADO EN NEXT.JS!
-const baseURL = process.env.NEXT_PUBLIC_APP_URL || 
-  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+// En cliente, usa el origen real del navegador para evitar CORS entre localhost y 0.0.0.0.
+const baseURL = typeof window !== 'undefined'
+  ? window.location.origin
+  : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 const API = axios.create({
   baseURL: `${baseURL}/api`,

@@ -6,8 +6,9 @@ async function fetchDoc(id: string){
   return data;
 }
 
-export default async function DocDetail({ params }: { params:{ id:string } }){
-  const doc = await fetchDoc(params.id);
+export default async function DocDetail({ params }: { params: Promise<{ id: string }> }){
+  const { id } = await params;
+  const doc = await fetchDoc(id);
   return (
     <div className="px-6 sm:px-8">
       <div className="w-full max-w-3xl mx-auto bg-[var(--card)] rounded-2xl shadow-lg p-6">

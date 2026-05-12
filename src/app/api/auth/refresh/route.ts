@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const { refresh } = refreshTokenSchema.parse(body);
 
     // Verificar token
-    const payload = await verifyRefreshToken(refresh);
+    await verifyRefreshToken(refresh);
 
     // Buscar token en BD
     const storedToken = await prisma.refreshToken.findUnique({
@@ -66,4 +66,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

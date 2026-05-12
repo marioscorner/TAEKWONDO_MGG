@@ -14,6 +14,7 @@ COPY . .
 
 # Variables de entorno para build
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/taekwondo_db?schema=public"
 
 # Generar Prisma Client
 RUN npx prisma generate
@@ -32,11 +33,14 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copiar archivos necesarios
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/server.js ./server.js
+
+RUN mkdir -p public/uploads/documents && chown -R nextjs:nodejs public
 
 USER nextjs
 
@@ -46,4 +50,3 @@ ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]
-

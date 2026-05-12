@@ -29,6 +29,16 @@ type SearchUser = {
   role: string;
 };
 
+type FriendApiItem = Friend & { friend?: Friend["friend"] };
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (typeof error === "object" && error !== null && "response" in error) {
+    const response = (error as { response?: { data?: { error?: string } } }).response;
+    return response?.data?.error || fallback;
+  }
+  return fallback;
+}
+
 export default function FriendsPage() {
   const [requests, setRequests] = useState<FriendReq[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -57,7 +67,7 @@ export default function FriendsPage() {
       setRequests(requestsList);
       
       // Los amigos vienen como array de objetos con { friend: {...} }
-      const friendsFormatted = friendsList.map((f: any) => f.friend || f);
+      const friendsFormatted = (friendsList as FriendApiItem[]).map((f) => f.friend || f);
       setFriends(friendsFormatted);
     } catch (error) {
       console.error("Error al cargar amigos:", error);
@@ -105,12 +115,8 @@ export default function FriendsPage() {
       setSearchResults([]);
       setShowResults(false);
       await reload();
-    } catch (error: any) {
-      if (error.response?.data?.error) {
-        alert(error.response.data.error);
-      } else {
-        alert("Error al enviar solicitud");
-      }
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, "Error al enviar solicitud"));
     }
   };
 
@@ -123,22 +129,27 @@ export default function FriendsPage() {
   }, [searchQuery]);
 
   return (
-    <div className="px-6 sm:px-8">
-      <div className="w-full max-w-6xl mx-auto flex flex-col gap-8">
+    <div className="space-y-6">
+      <div className="rounded-3xl bg-gradient-to-br from-slate-950 to-red-900 p-6 text-white shadow-martial sm:p-8">
+        <div className="mb-3 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-100">Comunidad</div>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Amigos y solicitudes</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-red-50">Busca compañeros, acepta solicitudes y abre conversaciones de entrenamiento.</p>
+      </div>
+      <div className="flex flex-col gap-6">
         {/* Buscador de usuarios */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Buscar usuarios</h2>
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+          <h2 className="mb-4 text-2xl font-bold text-slate-950 dark:text-white">Buscar usuarios</h2>
           <div className="relative">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Busca por nombre de usuario o email..."
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              className="min-h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-red-600 focus:ring-4 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-red-500 dark:focus:ring-red-950/40"
             />
             {searching && (
               <div className="absolute right-3 top-3">
-                <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
               </div>
             )}
           </div>
@@ -152,7 +163,7 @@ export default function FriendsPage() {
                 </div>
               ) : (
                 searchResults.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                  <div key={user.id} className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/40 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <div className="text-sm font-semibold text-gray-900 dark:text-white">{user.username}</div>
                       {(user.firstName || user.lastName) && (
@@ -163,14 +174,14 @@ export default function FriendsPage() {
                       <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded-full ${
                         user.role === 'INSTRUCTOR' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
                         user.role === 'ADMIN' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                        'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                            'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200'
                       }`}>
                         {user.role === 'INSTRUCTOR' ? 'Instructor' : user.role === 'ADMIN' ? 'Administrador' : 'Alumno'}
                       </span>
                     </div>
                     <button
                       onClick={() => sendRequest(user.id)}
-                      className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                      className="min-h-11 rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-900 dark:bg-red-600 dark:hover:bg-red-500"
                     >
                       Enviar solicitud
                     </button>
@@ -182,22 +193,22 @@ export default function FriendsPage() {
         </section>
 
         {/* Lista de amigos y solicitudes */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Mis Amigos</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+          <h1 className="mb-2 text-3xl font-bold text-slate-950 dark:text-white">Mis amigos</h1>
+          <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
             Gestiona solicitudes y consulta tu lista de amigos.
           </p>
 
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Solicitudes</h2>
+              <h2 className="mb-3 text-xl font-bold text-slate-950 dark:text-white">Solicitudes</h2>
               <div className="space-y-3">
                 {loading && <p className="text-sm text-gray-600 dark:text-gray-400">Cargando…</p>}
                 {!loading && requests.length === 0 && (
                   <p className="text-sm text-gray-600 dark:text-gray-400">No hay solicitudes pendientes.</p>
                 )}
                 {requests.map((req) => (
-                  <div key={req.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                  <div key={req.id} className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/40 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-sm">
                       <span className="font-semibold text-gray-900 dark:text-white">{req.from_user?.username}</span>
                     </div>
@@ -221,7 +232,7 @@ export default function FriendsPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Tu lista</h2>
+              <h2 className="mb-3 text-xl font-bold text-slate-950 dark:text-white">Tu lista</h2>
               
               {/* Filtro de amigos */}
               <input
@@ -229,7 +240,7 @@ export default function FriendsPage() {
                 value={friendFilter}
                 onChange={(e) => setFriendFilter(e.target.value)}
                 placeholder="Buscar en tus amigos..."
-                className="w-full px-3 py-2 mb-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className="mb-3 min-h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-red-600 focus:ring-4 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-red-500 dark:focus:ring-red-950/40"
               />
               
               {loading && <p className="text-sm text-gray-600 dark:text-gray-400">Cargando…</p>}
@@ -254,7 +265,7 @@ export default function FriendsPage() {
                     const isInstructorOrAdmin = friendRole === 'INSTRUCTOR' || friendRole === 'ADMIN';
                     
                     return (
-                      <div key={f.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                      <div key={f.id} className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/40 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-2">
                           <div className="font-medium text-sm text-gray-900 dark:text-white">{friendUsername}</div>
                           {isInstructorOrAdmin && (
@@ -278,11 +289,11 @@ export default function FriendsPage() {
                                 });
                                 // Redirigir al chat
                                 window.location.href = `/dashboard/chats/${res.data.id}`;
-                              } catch (error) {
+                              } catch {
                                 alert('Error al crear chat');
                               }
                             }}
-                            className="px-3 py-1.5 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white text-xs rounded-lg transition-colors"
+                            className="rounded-lg bg-red-700 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-900 dark:bg-red-600 dark:hover:bg-red-500"
                           >
                             💬 Chat
                           </button>
@@ -302,12 +313,12 @@ export default function FriendsPage() {
                                     try {
                                       await API.post(`/friends/unfriend/${friendId}`);
                                       await reload();
-                                    } catch (error: any) {
-                                      alert(error.response?.data?.error || 'Error al eliminar amigo');
+                                    } catch (error: unknown) {
+                                      alert(getApiErrorMessage(error, 'Error al eliminar amigo'));
                                     }
                                   }
                                 }}
-                                className="px-3 py-1.5 bg-orange-600 dark:bg-orange-500 hover:bg-orange-700 dark:hover:bg-orange-600 text-white text-xs rounded-lg transition-colors"
+                                className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700"
                               >
                                 Eliminar
                               </button>
@@ -317,7 +328,7 @@ export default function FriendsPage() {
                                     try {
                                       await Friends.block(friendId);
                                       await reload();
-                                    } catch (error) {
+                                    } catch {
                                       alert('Error al bloquear usuario');
                                     }
                                   }

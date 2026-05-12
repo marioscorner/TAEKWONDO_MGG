@@ -13,10 +13,8 @@ const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     // Leer preferencia guardada o usar la del sistema
     const savedTheme = localStorage.getItem("theme") as Theme | null;
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -55,4 +53,3 @@ export function useTheme(): ThemeContextType {
   if (!ctx) throw new Error("useTheme debe usarse dentro de un ThemeProvider");
   return ctx;
 }
-

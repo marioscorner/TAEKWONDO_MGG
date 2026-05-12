@@ -56,8 +56,11 @@ function ConfirmResetPasswordContent() {
       setTimeout(() => {
         router.push("/login?passwordReset=true");
       }, 2000);
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Error al restablecer contraseña");
+    } catch (err: unknown) {
+      const response = typeof err === "object" && err !== null && "response" in err
+        ? (err as { response?: { data?: { error?: string } } }).response
+        : undefined;
+      setError(response?.data?.error || "Error al restablecer contraseña");
     } finally {
       setLoading(false);
     }
@@ -169,4 +172,3 @@ export default function ConfirmResetPasswordPage() {
     </Suspense>
   );
 }
-

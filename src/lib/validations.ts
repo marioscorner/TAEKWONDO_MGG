@@ -14,7 +14,7 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
+  email: z.string().min(1, 'Email o usuario requerido'),
   password: z.string().min(1, 'La contraseña es requerida'),
 });
 
@@ -83,4 +83,3 @@ export const cursorPaginationSchema = z.object({
   cursor: z.string().optional(),
   page_size: z.coerce.number().int().positive().max(100).default(30),
 });
-

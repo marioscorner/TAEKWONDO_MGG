@@ -260,8 +260,11 @@ export default function InstructorPanelPage() {
                       setEditingBelt(null);
                       setBeltUpdateStatus(null);
                     }, 1000);
-                  } catch (error: any) {
-                    setBeltUpdateStatus({ type: 'error', message: error.response?.data?.error || 'Error al actualizar cinturón' });
+                  } catch (error: unknown) {
+                    const response = typeof error === "object" && error !== null && "response" in error
+                      ? (error as { response?: { data?: { error?: string } } }).response
+                      : undefined;
+                    setBeltUpdateStatus({ type: 'error', message: response?.data?.error || 'Error al actualizar cinturón' });
                   }
                 }}
                 className="flex-1 px-4 py-2 bg-purple-600 dark:bg-purple-500 hover:bg-purple-700 dark:hover:bg-purple-600 text-white rounded-lg font-medium transition-colors"
@@ -281,4 +284,3 @@ export default function InstructorPanelPage() {
     </div>
   );
 }
-

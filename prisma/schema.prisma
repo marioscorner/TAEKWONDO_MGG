@@ -33,6 +33,7 @@ model User {
   // Relations
   conversations      ConversationParticipant[]
   messages           Message[]
+  uploadedDocuments  Document[]
   friends            Friendship[]  @relation("UserFriends")
   friendOf           Friendship[]  @relation("FriendOf")
   blocked            BlockedUser[] @relation("Blocker")
@@ -123,11 +124,46 @@ model Message {
   editedAt       DateTime?
   isDeleted      Boolean  @default(false)
   
+  // Campos para archivos multimedia
+  fileUrl        String?  // URL del archivo subido
+  fileType       String?  // 'image', 'document', 'video', etc.
+  fileName       String?  // Nombre original del archivo
+  fileSize       Int?     // Tamaño en bytes
+  
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
   
   @@index([conversationId, createdAt])
   @@index([senderId])
+}
+
+// ============================================
+// DOCUMENTOS Y RECURSOS
+// ============================================
+
+model Document {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  description String?    @db.Text
+  fileUrl     String
+  fileName    String     @db.VarChar(255)
+  fileSize    Int
+  fileType    String     @db.VarChar(100)
+  uploadedBy  Int
+  visibility  Visibility @default(PUBLIC)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  uploader User @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([uploadedBy])
+  @@index([visibility])
+}
+
+enum Visibility {
+  PUBLIC
+  INSTRUCTOR_ONLY
 }
 
 // ============================================
@@ -185,4 +221,3 @@ model BlockedUser {
   @@index([blockerId])
   @@index([blockedId])
 }
-

@@ -4,9 +4,7 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-// Si quieres header/footer privados, impórtalos y añádelos en el JSX:
-import HeaderPrivate from "@/components/HeaderPrivate";
-// import Footer from "@/components/Footer";
+import AppLayout from "@/components/layout/AppLayout";
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -26,13 +24,5 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
   if (loading) return <div className="min-h-screen grid place-items-center text-sm text-gray-400">Comprobando sesión…</div>;
   if (!user) return null;
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      {/* <HeaderPrivate /> */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
-        {children}
-      </main>
-      {/* <Footer /> */}
-    </div>
-  );
+  return <AppLayout>{children}</AppLayout>;
 }

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/server/middleware/auth';
+import type { Prisma } from '@prisma/client';
 
 // GET - Obtener solicitudes del usuario (recibidas/enviadas)
 export async function GET(req: NextRequest) {
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = Math.min(parseInt(searchParams.get('page_size') || '20'), 100);
 
-    let where: any = { status: 'PENDING' };
+    const where: Prisma.FriendRequestWhereInput = { status: 'PENDING' };
 
     if (box === 'incoming') {
       where.toUserId = user.userId;
@@ -79,4 +80,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-

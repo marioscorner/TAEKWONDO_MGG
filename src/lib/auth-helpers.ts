@@ -1,7 +1,8 @@
 // src/lib/auth-helpers.ts
-import { SignJWT, jwtVerify } from 'jose';
+import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import bcrypt from 'bcrypt';
 import { NextRequest } from 'next/server';
+import { randomUUID } from 'crypto';
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-change-me');
 const refreshSecret = new TextEncoder().encode(process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret');
@@ -30,7 +31,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 // ============================================
 
 export async function signAccessToken(payload: TokenPayload): Promise<string> {
-  return new SignJWT(payload as any)
+  return new SignJWT(payload as JWTPayload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('15m') // Token de acceso corto
@@ -41,7 +42,7 @@ export async function verifyAccessToken(token: string): Promise<TokenPayload> {
   try {
     const { payload } = await jwtVerify(token, secret);
     return payload as TokenPayload;
-  } catch (error) {
+  } catch {
     throw new Error('Token inválido o expirado');
   }
 }
@@ -51,7 +52,7 @@ export async function verifyAccessToken(token: string): Promise<TokenPayload> {
 // ============================================
 
 export async function signRefreshToken(payload: { userId: number }): Promise<string> {
-  return new SignJWT(payload as any)
+  return new SignJWT({ ...payload, jti: randomUUID() } as JWTPayload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d') // Refresh token más largo
@@ -62,7 +63,7 @@ export async function verifyRefreshToken(token: string): Promise<{ userId: numbe
   try {
     const { payload } = await jwtVerify(token, refreshSecret);
     return payload as { userId: number };
-  } catch (error) {
+  } catch {
     throw new Error('Refresh token inválido o expirado');
   }
 }
@@ -96,4 +97,3 @@ export function sanitizeEmail(email: string): string {
 export function generateRandomToken(): string {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
-

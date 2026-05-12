@@ -11,6 +11,7 @@ import FooterPublic from "@/components/Footer";
 function LayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { user, loading } = useAuth();
+  const isDashboard = pathname.startsWith("/dashboard");
   
   // Si está autenticado: HeaderPrivate
   // Si no está autenticado o está cargando: HeaderPublic
@@ -18,6 +19,10 @@ function LayoutContent({ children }: { children: ReactNode }) {
 
   return (
     <>
+      {isDashboard ? (
+        children
+      ) : (
+        <>
       {/* Header fijo basado en autenticación */}
       <div className="fixed top-0 left-0 right-0 z-50">
         {showPrivateHeader ? <HeaderPrivate /> : <HeaderPublic />}
@@ -29,6 +34,8 @@ function LayoutContent({ children }: { children: ReactNode }) {
       <div className="fixed bottom-0 left-0 right-0 z-50">
         <FooterPublic />
       </div>
+        </>
+      )}
     </>
   );
 }

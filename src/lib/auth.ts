@@ -41,14 +41,13 @@ export async function logout(refresh: string) {
   }
 }
 
-// TODO: Implementar verificación de email y reset de contraseña más adelante si es necesario
-// export async function requestEmailVerify(email: string) {
-//   await api.post("/auth/email/verify/request", { email });
-// }
+export async function confirmEmailVerify(uid: number, token: string) {
+  return api.post("/auth/email/verify/confirm", { uid, token });
+}
 
-// export async function confirmEmailVerify(uid: number, token: string) {
-//   return api.post("/auth/email/verify/confirm", { uid, token });
-// }
+export async function requestEmailVerify(email: string) {
+  return api.post("/auth/email/verify/request", { email });
+}
 
 // export async function requestPasswordReset(email: string) {
 //   await api.post("/auth/password/reset/request", { email });

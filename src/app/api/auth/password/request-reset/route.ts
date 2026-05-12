@@ -54,8 +54,12 @@ export async function POST(req: NextRequest) {
       });
       
       console.log(`✅ Email de recuperación enviado a: ${user.email}`);
-    } catch (emailError) {
+    } catch (emailError: unknown) {
       console.error('❌ Error al enviar email:', emailError);
+      const details = emailError instanceof Error ? emailError.message : String(emailError);
+      const stack = emailError instanceof Error ? emailError.stack : undefined;
+      console.error('   Detalles:', details);
+      console.error('   Stack:', stack);
       // No fallar la petición si el email falla, pero loguear
       // En producción, podrías querer manejar esto de forma diferente
     }
@@ -71,4 +75,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

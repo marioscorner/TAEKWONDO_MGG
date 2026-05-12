@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { io, type Socket } from "socket.io-client";
 import { sendMessage as sendMessageAPI, markConversationRead } from "@/lib/chat";
 
 type BaseMessage = {
@@ -18,11 +19,11 @@ type ChatEvent =
   | { event: "error"; detail?: string };
 
 /**
- * Hook para chat en tiempo real usando polling inteligente
- * Más confiable que WebSocket para MVP y funciona sin servidor custom
+ * Hook para chat en tiempo real usando Socket.IO con fallback de polling.
  */
 export function useChatSocket(conversationId: number | null) {
-  const [connected, setConnected] = useState(true); // Siempre "conectado" con polling
+  const [connected, setConnected] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastMessageIdRef = useRef<number>(0);
   const messageHandlerRef = useRef<((evt: ChatEvent) => void) | null>(null);
@@ -63,13 +64,15 @@ export function useChatSocket(conversationId: number | null) {
         }
       }
     } catch (error) {
-      console.error("Error al hacer polling:", error);
+      console.error("Error al hacer fallback polling:", error);
     }
   }, [conversationId]);
 
-  // Iniciar polling cuando hay conversación activa
+  // Conectar socket cuando hay conversación activa. Si falla, se mantiene polling.
   useEffect(() => {
     if (!conversationId) {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -77,12 +80,44 @@ export function useChatSocket(conversationId: number | null) {
       return;
     }
 
-    setConnected(true);
-    
-    // Poll cada 2 segundos cuando el chat está abierto
-    intervalRef.current = setInterval(pollMessages, 2000);
+    const token = localStorage.getItem("access");
+    const socket = io(undefined, {
+      auth: { token },
+      transports: ["websocket", "polling"],
+    });
+
+    socketRef.current = socket;
+    socket.emit("conversation:join", conversationId);
+
+    socket.on("connect", () => setConnected(true));
+    socket.on("disconnect", () => setConnected(false));
+    socket.on("connect_error", () => setConnected(false));
+    socket.on("message.new", (message: BaseMessage) => {
+      if (message.id > lastMessageIdRef.current) {
+        lastMessageIdRef.current = message.id;
+      }
+      messageHandlerRef.current?.({ event: "message.new", message });
+    });
+    socket.on("conversation.read", (evt: { by: number; at: string }) => {
+      messageHandlerRef.current?.({ event: "conversation.read", by: evt.by, at: evt.at });
+    });
+    socket.on("typing.start", (evt: { by: number; at?: string }) => {
+      messageHandlerRef.current?.({ event: "typing.start", by: evt.by, at: evt.at });
+    });
+    socket.on("typing.stop", (evt: { by: number; at?: string }) => {
+      messageHandlerRef.current?.({ event: "typing.stop", by: evt.by, at: evt.at });
+    });
+
+    intervalRef.current = setInterval(() => {
+      if (!socket.connected) {
+        pollMessages();
+      }
+    }, 5000);
 
     return () => {
+      socket.emit("conversation:leave", conversationId);
+      socket.disconnect();
+      socketRef.current = null;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -101,15 +136,13 @@ export function useChatSocket(conversationId: number | null) {
         lastMessageIdRef.current = message.id;
       }
 
-      // Disparar evento inmediatamente para el mensaje propio
-      messageHandlerRef.current?.({
-        event: "message.new",
-        message: message as BaseMessage,
-      });
-
-      // Forzar un poll inmediato
-      setTimeout(pollMessages, 100);
-    } catch (error) {
+      if (!socketRef.current?.connected) {
+        messageHandlerRef.current?.({
+          event: "message.new",
+          message: message as BaseMessage,
+        });
+      }
+    } catch {
       messageHandlerRef.current?.({
         event: "error",
         detail: "Error al enviar mensaje",
@@ -121,22 +154,18 @@ export function useChatSocket(conversationId: number | null) {
     if (!conversationId) return;
     try {
       await markConversationRead(conversationId);
+      socketRef.current?.emit("conversation:read", { conversationId });
     } catch (error) {
       console.error("Error al marcar como leído:", error);
     }
   };
 
   const sendTypingStart = (userId: number) => {
-    // Simular typing indicator localmente
-    // En producción, esto se enviaría al servidor
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    messageHandlerRef.current?.({
-      event: "typing.start",
-      by: userId, // ID del usuario que está escribiendo
-    });
+    socketRef.current?.emit("typing:start", { conversationId, userId });
 
     // Auto-stop después de 3 segundos
     typingTimeoutRef.current = setTimeout(() => {
@@ -150,10 +179,7 @@ export function useChatSocket(conversationId: number | null) {
       typingTimeoutRef.current = null;
     }
 
-    messageHandlerRef.current?.({
-      event: "typing.stop",
-      by: userId,
-    });
+    socketRef.current?.emit("typing:stop", { conversationId, userId });
   };
 
   const setOnMessage = (handler: (evt: ChatEvent) => void) => {

@@ -36,6 +36,8 @@ services:
       SMTP_FROM: ${SMTP_FROM}
       INSTRUCTOR_SECRET_PASSWORD: ${INSTRUCTOR_SECRET_PASSWORD}
       NODE_ENV: production
+    volumes:
+      - uploads_data:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -76,6 +78,8 @@ volumes:
   postgres_data:
     driver: local
   certbot_www:
+    driver: local
+  uploads_data:
     driver: local
 
 networks:

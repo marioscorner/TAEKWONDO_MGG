@@ -71,15 +71,18 @@ export default function InstructorRegisterForm() {
       setTimeout(() => {
         router.push("/login?registered=instructor");
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error en registro de instructor:", err);
+      const response = typeof err === "object" && err !== null && "response" in err
+        ? (err as { response?: { data?: { error?: string }; status?: number } }).response
+        : undefined;
       
       // Mostrar error específico del servidor
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else if (err.response?.status === 403) {
+      if (response?.data?.error) {
+        setError(response.data.error);
+      } else if (response?.status === 403) {
         setError("Contraseña secreta incorrecta");
-      } else if (err.response?.status === 400) {
+      } else if (response?.status === 400) {
         setError("El email o nombre de usuario ya está registrado");
       } else {
         setError("Error al crear la cuenta. Intenta de nuevo.");
@@ -253,4 +256,3 @@ export default function InstructorRegisterForm() {
     </Card>
   );
 }
-

@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { getProfile, updateProfile } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +20,6 @@ type ProfileData = {
 };
 
 export default function ProfileForm() {
-  const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -35,7 +33,7 @@ export default function ProfileForm() {
     try {
       const res = await getProfile();
       setProfile(res.data);
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Error al cargar el perfil' });
     } finally {
       setLoading(false);
@@ -60,7 +58,7 @@ export default function ProfileForm() {
       await updateProfile(data);
       await loadProfile();
       // Actualización silenciosa - sin mensaje de éxito
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Error al actualizar el perfil' });
     } finally {
       setSaving(false);
@@ -171,4 +169,3 @@ export default function ProfileForm() {
     </Card>
   );
 }
-

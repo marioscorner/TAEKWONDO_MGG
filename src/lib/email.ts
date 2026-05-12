@@ -13,9 +13,19 @@ interface EmailOptions {
 export async function sendEmail({ to, subject, html }: EmailOptions) {
   // Verificar que las variables de entorno estén configuradas
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.error('Variables SMTP no configuradas correctamente');
-    throw new Error('Configuración de email incompleta');
+    const missing = [];
+    if (!process.env.SMTP_HOST) missing.push('SMTP_HOST');
+    if (!process.env.SMTP_USER) missing.push('SMTP_USER');
+    if (!process.env.SMTP_PASS) missing.push('SMTP_PASS');
+    console.error('❌ Variables SMTP faltantes:', missing.join(', '));
+    throw new Error(`Configuración de email incompleta. Faltan: ${missing.join(', ')}`);
   }
+
+  console.log('📧 Configurando transporte SMTP...');
+  console.log('   Host:', process.env.SMTP_HOST);
+  console.log('   Port:', process.env.SMTP_PORT || '587');
+  console.log('   User:', process.env.SMTP_USER);
+  console.log('   From:', process.env.SMTP_FROM || process.env.SMTP_USER);
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -25,14 +35,32 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
+    // Añadir debug para ver qué está pasando
+    debug: true,
+    logger: true,
   });
 
-  await transporter.sendMail({
+  // Verificar conexión antes de enviar
+  try {
+    console.log('🔍 Verificando conexión SMTP...');
+    await transporter.verify();
+    console.log('✅ Conexión SMTP verificada correctamente');
+  } catch (verifyError: unknown) {
+    const message = verifyError instanceof Error ? verifyError.message : String(verifyError);
+    console.error('❌ Error al verificar conexión SMTP:', message);
+    throw new Error(`Error de conexión SMTP: ${message}`);
+  }
+
+  console.log(`📨 Enviando email a: ${to}`);
+  const result = await transporter.sendMail({
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
     subject,
     html,
   });
+
+  console.log('✅ Email enviado correctamente. MessageId:', result.messageId);
+  return result;
 }
 
 /**
@@ -152,4 +180,3 @@ export function getPasswordResetEmailTemplate(username: string, resetUrl: string
     </html>
   `;
 }
-

@@ -9,6 +9,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          red: "#991B1B",
+          flame: "#DC2626",
+          bright: "#EF4444",
+          navy: "#0F172A",
+          gold: "#D97706",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -42,6 +49,9 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      boxShadow: {
+        martial: "0 18px 45px -28px rgba(153, 27, 27, 0.65)",
       },
       borderRadius: {
         lg: "var(--radius)",

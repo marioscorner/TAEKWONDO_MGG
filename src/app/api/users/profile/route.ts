@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
         phone: true,
         birthDate: true,
         belt: true,
+        avatarUrl: true,
         emailVerified: true,
         createdAt: true,
         updatedAt: true,
@@ -94,6 +95,7 @@ async function updateProfile(req: NextRequest) {
         phone: true,
         birthDate: true,
         belt: true,
+        avatarUrl: true,
       },
     });
 

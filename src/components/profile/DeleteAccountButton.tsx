@@ -38,10 +38,13 @@ export default function DeleteAccountButton() {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       router.push("/login?deleted=true");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al eliminar cuenta:", error);
+      const response = typeof error === "object" && error !== null && "response" in error
+        ? (error as { response?: { data?: { error?: string } } }).response
+        : undefined;
       setError(
-        error.response?.data?.error || "Error al eliminar la cuenta"
+        response?.data?.error || "Error al eliminar la cuenta"
       );
     } finally {
       setLoading(false);
@@ -137,4 +140,3 @@ export default function DeleteAccountButton() {
     </>
   );
 }
-

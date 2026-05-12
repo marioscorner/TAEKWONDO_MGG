@@ -4,28 +4,29 @@ import taekwondo from "../../public/tkd_main.jpg";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+      <section className="container mx-auto px-6 py-12 sm:py-16">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 overflow-hidden rounded-[2rem] bg-slate-950 p-6 text-white shadow-martial md:grid-cols-2 md:p-10">
           {/* Columna izquierda: texto */}
           <div className="flex flex-col gap-6">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
-              Taekwondo
+            <div className="w-fit rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-red-100">Madrid · Arganzuela</div>
+            <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-6xl">
+              Taekwondo Mario Gutiérrez
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-              Arte marcial, deporte olímpico y camino de desarrollo personal
+            <p className="text-xl leading-relaxed text-slate-200">
+              Entrena con disciplina. Progresa con criterio. Crece dentro y fuera del tatami.
             </p>
             <div className="flex flex-wrap gap-4 mt-4">
               <Link
                 href="/register"
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-lg"
+                className="rounded-xl bg-red-700 px-8 py-3 font-bold text-white shadow-lg transition-colors hover:bg-red-900"
               >
                 Únete ahora
               </Link>
               <Link
                 href="/about"
-                className="px-8 py-3 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-semibold rounded-lg border-2 border-gray-300 dark:border-gray-600 transition-colors"
+                className="rounded-xl border-2 border-white/20 bg-white/10 px-8 py-3 font-bold text-white transition-colors hover:bg-white/20"
               >
                 Sobre mí
               </Link>
@@ -39,7 +40,7 @@ export default function Home() {
               alt="Practicante de Taekwondo"
               width={600}
               height={500}
-              className="rounded-2xl object-cover shadow-2xl"
+              className="rounded-[1.5rem] object-cover shadow-2xl ring-1 ring-white/10"
               priority
             />
           </div>
@@ -47,14 +48,14 @@ export default function Home() {
       </section>
 
       {/* ¿Qué es el Taekwondo? */}
-      <section className="bg-white dark:bg-gray-800 py-20">
+      <section className="bg-white py-20 dark:bg-slate-900">
         <div className="container mx-auto px-6 max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+          <h2 className="mb-12 text-center text-4xl font-bold text-slate-950 dark:text-white">
             ¿Qué es el Taekwondo?
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8 mb-8">
-            <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 dark:border-slate-800 dark:bg-slate-950/50">
               <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
                 Un Arte Marcial Completo
               </h3>
@@ -68,7 +69,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-700 p-8 rounded-xl">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 dark:border-slate-800 dark:bg-slate-950/50">
               <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
                 Cuerpo y Mente en Armonía
               </h3>
@@ -82,7 +83,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="bg-blue-50 dark:bg-blue-900/30 p-8 rounded-xl border-2 border-blue-200 dark:border-blue-700">
+          <div className="rounded-2xl border-2 border-red-200 bg-red-50 p-8 dark:border-red-900/70 dark:bg-red-950/20">
             <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
               📋 Inscripciones
             </h3>
@@ -97,7 +98,7 @@ export default function Home() {
       </section>
 
       {/* Dónde Encontrarme */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="bg-slate-50 py-20 dark:bg-slate-950">
         <div className="container mx-auto px-6 max-w-6xl">
           <h2 className="text-4xl font-bold text-center mb-4 text-gray-900 dark:text-white">
             📍 Actualmente estoy enseñando en:
@@ -108,7 +109,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Información del lugar */}
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
                 Centro Dotacional Integrado Arganzuela
               </h3>
@@ -157,7 +158,7 @@ export default function Home() {
                     href="https://www.google.com/maps/search/?api=1&query=Centro+Dotacional+Integrado+Arganzuela,+Calle+Canarias+17,+28045+Madrid"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                    className="inline-flex items-center gap-2 font-semibold text-red-700 hover:underline dark:text-red-300"
                   >
                     🗺️ Ver indicaciones en Google Maps
                   </a>
@@ -166,7 +167,7 @@ export default function Home() {
             </div>
 
             {/* Mapa de Google */}
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg h-full">
+            <div className="h-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <iframe
                 src="https://www.google.com/maps?q=Centro+Dotacional+Integrado+Arganzuela,+Calle+Canarias+17,+28045+Madrid&output=embed"
                 width="100%"
@@ -184,7 +185,7 @@ export default function Home() {
       </section>
 
       {/* Enlaces Oficiales */}
-      <section className="py-16 bg-white dark:bg-gray-800">
+      <section className="bg-white py-16 dark:bg-slate-900">
         <div className="container mx-auto px-6 max-w-6xl">
           <h3 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
             Enlaces Oficiales
@@ -194,7 +195,7 @@ export default function Home() {
               href="https://fmtaekwondo.es/"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg text-center transition-colors"
+              className="rounded-xl bg-slate-100 p-4 text-center transition-colors hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-950/30"
             >
               <p className="font-semibold text-gray-900 dark:text-white">
                 Federación Madrileña
@@ -204,7 +205,7 @@ export default function Home() {
               href="https://rfetaekwondo.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg text-center transition-colors"
+              className="rounded-xl bg-slate-100 p-4 text-center transition-colors hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-950/30"
             >
               <p className="font-semibold text-gray-900 dark:text-white">
                 Federación Española
@@ -214,7 +215,7 @@ export default function Home() {
               href="https://worldtaekwondo.org/"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg text-center transition-colors"
+              className="rounded-xl bg-slate-100 p-4 text-center transition-colors hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-950/30"
             >
               <p className="font-semibold text-gray-900 dark:text-white">
                 World Taekwondo
@@ -224,7 +225,7 @@ export default function Home() {
               href="https://olympics.com/es/deportes/taekwondo/"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg text-center transition-colors"
+              className="rounded-xl bg-slate-100 p-4 text-center transition-colors hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-950/30"
             >
               <p className="font-semibold text-gray-900 dark:text-white">
                 Taekwondo Olímpico
