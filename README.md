@@ -1,31 +1,51 @@
-# 🥋 Taekwondo Mario Gutiérrez - Plataforma Web
+# Taekwondo Mario Gutierrez - Plataforma Web
 
-Aplicación web full-stack para la escuela de Taekwondo de Mario Gutiérrez en Madrid. Sistema completo con autenticación, chat en tiempo real, gestión de amigos y contenido educativo.
+Aplicacion web full-stack para la escuela de Taekwondo de Mario Gutierrez en Madrid. Incluye area publica, autenticacion, dashboard privado, chat en tiempo real, gestion de amistades, recursos educativos, perfiles de usuario y herramientas para instructores.
 
-## 🚀 Stack Tecnológico
+## Stack Tecnologico
 
 ### Frontend
-- **Next.js 15** (App Router)
+
+- **Next.js 15.5** con App Router
 - **React 19**
-- **TypeScript**
-- **Tailwind CSS 4**
-- **Radix UI** (componentes accesibles)
+- **TypeScript 5**
+- **Tailwind CSS 3.4** con modo oscuro por clase
+- **Radix UI** para componentes accesibles
+- **Lucide React** para iconografia
+- **React Day Picker** para calendarios
+- **Swiper** para carruseles
+- **Axios** para cliente HTTP con refresh automatico de tokens
 
-### Backend (Integrado en Next.js)
-- **Next.js API Routes** (Backend completo)
-- **Prisma ORM** (Base de datos)
-- **PostgreSQL** (Recomendado) o MySQL
-- **JWT Authentication** (con jose)
-- **bcrypt** (hash de contraseñas)
-- **Zod** (validación de datos)
+### Backend
 
-## 📋 Requisitos Previos
+- **Next.js API Routes** como backend integrado
+- **Node.js 20** en Docker
+- **Servidor Node personalizado** (`server.js`) para Next.js + Socket.IO
+- **Socket.IO 4.8** para chat en tiempo real, escritura y eventos de lectura
+- **Prisma ORM 6.19**
+- **PostgreSQL**
+- **JWT** con `jose`
+- **bcrypt** para hash de contrasenas
+- **Zod** para validacion de datos
+- **Nodemailer** para emails SMTP de recuperacion de contrasena
 
-- Node.js 18+ 
-- npm o pnpm
-- PostgreSQL (o MySQL)
+### Infraestructura y Herramientas
 
-## 🛠️ Instalación
+- **Docker** y **Docker Compose**
+- **PostgreSQL 16 Alpine** en compose local y produccion
+- **Nginx** como reverse proxy con HTTPS y soporte WebSocket
+- **Let's Encrypt** para certificados SSL
+- **ESLint 9** con configuracion de Next.js
+- **PostCSS** y **Autoprefixer**
+- **ts-node** para scripts administrativos
+
+## Requisitos Previos
+
+- Node.js 20 recomendado
+- npm
+- PostgreSQL o Docker Compose para levantar la base de datos local
+
+## Instalacion
 
 ### 1. Clonar el repositorio
 
@@ -42,46 +62,57 @@ npm install
 
 ### 3. Configurar variables de entorno
 
-Copia el archivo de ejemplo y configúralo:
+Copia el archivo de ejemplo y rellena los valores:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Edita `.env.local` con tus valores:
+Variables principales:
 
 ```env
-# Database
-DATABASE_URL="postgresql://usuario:password@localhost:5432/taekwondo_db"
+# Base de datos PostgreSQL
+DATABASE_URL="postgresql://usuario:password@host:5432/database?schema=public"
 
-# JWT Secrets (¡CAMBIA ESTOS EN PRODUCCIÓN!)
-JWT_SECRET="tu-secret-super-seguro-cambiar-en-produccion"
-JWT_REFRESH_SECRET="otro-secret-diferente-para-refresh-tokens"
+# JWT
+JWT_SECRET="tu-secret-super-seguro-y-largo"
+JWT_REFRESH_SECRET="otro-secret-diferente-y-largo"
 
-# Next.js
+# URL publica de la aplicacion
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# SMTP para recuperacion de contrasena
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tu-email@gmail.com
+SMTP_PASS=tu-app-password
+SMTP_FROM="Taekwondo Mario Gutierrez <tu-email@gmail.com>"
+
+# Registro de instructores
+INSTRUCTOR_SECRET_PASSWORD="tu-contrasena-secreta"
+
+# Google Maps opcional
+# NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="tu-api-key"
 ```
 
-### 4. Configurar la base de datos
+### 4. Levantar PostgreSQL local con Docker
 
 ```bash
-# Genera el cliente de Prisma
+docker compose -f docker-compose.local.yml up -d
+```
+
+### 5. Preparar la base de datos
+
+```bash
 npm run db:generate
-
-# Ejecuta las migraciones (crea las tablas)
 npm run db:push
+```
 
-# O si prefieres usar migraciones versionadas:
+Tambien puedes usar migraciones versionadas:
+
+```bash
 npm run db:migrate
 ```
-
-### 5. (Opcional) Explorar la base de datos
-
-```bash
-npm run db:studio
-```
-
-Esto abrirá Prisma Studio en `http://localhost:5555`
 
 ### 6. Ejecutar en desarrollo
 
@@ -89,94 +120,150 @@ Esto abrirá Prisma Studio en `http://localhost:5555`
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+La aplicacion queda disponible en [http://localhost:3000](http://localhost:3000).
 
-## 📁 Estructura del Proyecto
+## Scripts Disponibles
 
+```bash
+npm run dev                # Ejecutar servidor Node + Next.js + Socket.IO
+npm run build              # Build de produccion
+npm run start              # Iniciar servidor en produccion
+npm run lint               # Linter
+
+npm run db:generate        # Generar Prisma Client
+npm run db:push            # Sincronizar schema con PostgreSQL
+npm run db:migrate         # Crear y aplicar migraciones en desarrollo
+npm run db:migrate:deploy  # Aplicar migraciones en produccion
+npm run db:migrate:status  # Ver estado de migraciones
+npm run db:studio          # Abrir Prisma Studio
+
+npm run create-superuser   # Crear usuario ADMIN por consola
 ```
+
+## Estructura del Proyecto
+
+```text
 TAEKWONDO_MGG/
 ├── prisma/
-│   └── schema.prisma          # Schema de base de datos
+│   └── schema.prisma             # Modelos PostgreSQL y relaciones
+├── public/
+│   └── uploads/                  # Imagenes y documentos subidos
+├── scripts/
+│   └── create-superuser.ts       # Script para crear usuarios ADMIN
 ├── src/
 │   ├── app/
-│   │   ├── api/               # 🔥 BACKEND (API Routes)
-│   │   │   ├── auth/          # Login, registro, logout, refresh
-│   │   │   ├── users/         # Perfil de usuario
-│   │   │   ├── chat/          # Conversaciones y mensajes
-│   │   │   ├── friends/       # Sistema de amistades
-│   │   │   └── health/        # Health check
-│   │   ├── (private)/         # Rutas protegidas
-│   │   │   └── dashboard/     # Panel privado
-│   │   └── ...                # Páginas públicas
-│   ├── components/            # Componentes React
-│   ├── context/               # Context API (Auth)
-│   ├── hooks/                 # Custom hooks
-│   ├── lib/                   # Utilidades
-│   │   ├── api.ts            # Cliente HTTP (Axios)
-│   │   ├── auth.ts           # Servicios de autenticación
-│   │   ├── chat.ts           # Servicios de chat
-│   │   ├── friends.ts        # Servicios de amigos
-│   │   ├── prisma.ts         # Cliente Prisma
-│   │   ├── auth-helpers.ts   # JWT, bcrypt helpers
-│   │   └── validations.ts    # Schemas Zod
-│   ├── server/                # Lógica del servidor
-│   │   └── middleware/        # Middleware de autenticación
-│   └── types/                 # TypeScript types
-└── ...
+│   │   ├── api/                  # Backend con API Routes
+│   │   │   ├── auth/             # Login, registro, refresh, logout, password reset
+│   │   │   ├── chat/             # Conversaciones, mensajes y lectura
+│   │   │   ├── documents/        # Listado, subida y borrado de documentos
+│   │   │   ├── friends/          # Amistades, solicitudes y bloqueos
+│   │   │   ├── instructor/       # Dashboard, alumnos, estadisticas y cinturones
+│   │   │   ├── upload/           # Subida de imagenes
+│   │   │   ├── users/            # Perfil, busqueda y eliminacion de cuenta
+│   │   │   └── health/           # Health check de aplicacion y BD
+│   │   ├── (private)/dashboard/  # Rutas protegidas
+│   │   ├── about/                # Pagina publica sobre el instructor
+│   │   ├── docs/                 # Recursos publicos/documentacion
+│   │   ├── login/                # Inicio de sesion
+│   │   ├── register/             # Registro de alumnos e instructores
+│   │   └── reset-password/       # Recuperacion de contrasena
+│   ├── components/               # Componentes React
+│   ├── context/                  # AuthContext
+│   ├── hooks/                    # Hooks, incluido chat Socket.IO
+│   ├── lib/                      # API client, Prisma, auth, socket, email y servicios
+│   ├── server/middleware/        # Middleware de autenticacion y roles
+│   └── types/                    # Tipos TypeScript
+├── nginx/
+│   └── nginx.conf                # Reverse proxy HTTPS y WebSocket
+├── Dockerfile                    # Imagen multi-stage de produccion
+├── docker-compose.yml            # Produccion con app, PostgreSQL y Nginx
+├── docker-compose.local.yml      # PostgreSQL local
+└── server.js                     # Servidor Node custom con Socket.IO
 ```
 
-## 🎯 Funcionalidades Principales
+## Funcionalidades Principales
 
-### ✅ Completadas
+### Completadas
 
-- ✅ Autenticación completa (registro, login, logout, refresh token)
-- ✅ Gestión de perfil de usuario
-- ✅ Sistema de roles (ADMIN, INSTRUCTOR, ALUMNO)
-- ✅ Sistema de amistades
-- ✅ Solicitudes de amistad
-- ✅ Bloqueo de usuarios
-- ✅ Chat 1:1 (HTTP)
-- ✅ Chats grupales (HTTP)
-- ✅ Mensajes con paginación
-- ✅ Marcar conversaciones como leídas
-- ✅ Contador de mensajes no leídos
-- ✅ Documentación pública
-- ✅ Página de información (Sobre mí)
-- ✅ Health check endpoint
+- Autenticacion completa con registro, login, logout y refresh token.
+- Roles `ADMIN`, `INSTRUCTOR` y `ALUMNO`.
+- Registro de instructores protegido por contrasena secreta.
+- Creacion de superusuario ADMIN por script.
+- Perfil de usuario con datos personales, cinturon y avatar.
+- Eliminacion de cuenta con confirmacion y validacion de contrasena.
+- Recuperacion de contrasena por email mediante SMTP.
+- Amistades bidireccionales, solicitudes, cancelacion, rechazo y aceptacion.
+- Bloqueo y desbloqueo de usuarios.
+- Busqueda de usuarios autenticada.
+- Chat 1:1 y chats grupales.
+- Chat en tiempo real con Socket.IO y fallback de polling.
+- Indicadores de escritura y eventos de lectura en conversaciones.
+- Mensajes paginados y contador de no leidos.
+- Restriccion de chat 1:1 a usuarios amigos y no bloqueados.
+- Subida de imagenes para avatar y grupos.
+- Documentos educativos: listado, busqueda, subida y borrado.
+- Permisos de documentos para instructores y administradores.
+- Dashboard de instructor con estadisticas.
+- Gestion de alumnos por instructor/administrador.
+- Actualizacion de cinturones de alumnos.
+- Paginas publicas: inicio, sobre mi, documentacion y health page.
+- Health check API con verificacion de base de datos.
+- Modo oscuro en la interfaz.
+- Dockerizacion con PostgreSQL, aplicacion y Nginx/HTTPS.
 
-### 🚧 Por Implementar
+### Pendiente o Parcial
 
-- 🚧 WebSocket real-time para chat (actualmente funciona con HTTP polling)
-- 🚧 Notificaciones push
-- 🚧 Verificación de email
-- 🚧 Reset de contraseña por email
-- 🚧 Búsqueda de usuarios
-- 🚧 Subida de imágenes de perfil
-- 🚧 Edición y eliminación de mensajes
-- 🚧 Reacciones a mensajes
-- 🚧 Tests automatizados
+- Verificacion de email: hay campos de modelo y UI parcial, pero faltan endpoints backend dedicados.
+- Notificaciones push.
+- Edicion y eliminacion logica de mensajes desde UI/API dedicada.
+- Reacciones a mensajes.
+- Tests automatizados.
 
-## 🔐 API Endpoints
+## API Endpoints
 
 ### Auth
-- `POST /api/auth/register` - Registro de usuario
-- `POST /api/auth/login` - Iniciar sesión
-- `POST /api/auth/logout` - Cerrar sesión
-- `POST /api/auth/refresh` - Refrescar token
+
+- `POST /api/auth/register` - Registro de alumno
+- `POST /api/auth/register/instructor` - Registro de instructor con clave secreta
+- `POST /api/auth/login` - Iniciar sesion
+- `POST /api/auth/logout` - Cerrar sesion y revocar refresh token
+- `POST /api/auth/refresh` - Refrescar tokens
+- `POST /api/auth/password/request-reset` - Solicitar recuperacion de contrasena
+- `POST /api/auth/password/reset` - Confirmar nueva contrasena con token
 
 ### Users
+
 - `GET /api/users/profile` - Obtener perfil
 - `PUT /api/users/profile` - Actualizar perfil
+- `PATCH /api/users/profile` - Actualizar perfil
+- `GET /api/users/search?q=<query>` - Buscar usuarios
+- `DELETE /api/users/delete-account` - Eliminar cuenta autenticada
+
+### Uploads
+
+- `POST /api/upload/image` - Subir imagen de avatar o grupo
 
 ### Chat
+
 - `GET /api/chat/conversations` - Listar conversaciones
-- `POST /api/chat/conversations` - Crear conversación
-- `GET /api/chat/conversations/:id` - Obtener conversación
-- `GET /api/chat/conversations/:id/messages` - Listar mensajes
+- `POST /api/chat/conversations` - Crear conversacion 1:1 o grupal
+- `GET /api/chat/conversations/:id` - Obtener conversacion
+- `GET /api/chat/conversations/:id/messages` - Listar mensajes paginados
 - `POST /api/chat/conversations/:id/messages` - Enviar mensaje
-- `POST /api/chat/conversations/:id/read` - Marcar como leída
+- `POST /api/chat/conversations/:id/read` - Marcar como leida
+- `DELETE /api/chat/conversations/:id/read` - Marcar como no leida
+
+### Eventos Socket.IO
+
+- `conversation:join` - Unirse a una sala de conversacion
+- `conversation:leave` - Salir de una sala de conversacion
+- `message.new` - Recibir mensaje nuevo
+- `typing:start` - Usuario escribiendo
+- `typing:stop` - Usuario dejo de escribir
+- `conversation:read` - Conversacion marcada como leida
 
 ### Friends
+
 - `GET /api/friends` - Listar amigos
 - `POST /api/friends/unfriend/:id` - Eliminar amistad
 - `POST /api/friends/requests` - Enviar solicitud
@@ -188,51 +275,87 @@ TAEKWONDO_MGG/
 - `DELETE /api/friends/block/:id` - Desbloquear usuario
 - `GET /api/friends/blocked` - Listar bloqueados
 
-## 🚀 Deploy
+### Documents
 
-### Vercel (Recomendado)
+- `GET /api/documents` - Listar documentos publicos con busqueda y paginacion
+- `GET /api/documents/:id` - Obtener documento
+- `DELETE /api/documents/:id` - Eliminar documento autorizado
+- `POST /api/documents/upload` - Subir documento como instructor o admin
 
-1. Conecta tu repositorio a Vercel
-2. Configura las variables de entorno en el dashboard
-3. Añade una base de datos PostgreSQL (Vercel Postgres, Supabase, Railway, etc.)
-4. Deploy automático ✨
+### Instructor
 
-### Railway / Render
+- `GET /api/instructor/stats` - Estadisticas del dashboard de instructor
+- `GET /api/instructor/students` - Listar alumnos
+- `PATCH /api/instructor/students/:id/belt` - Actualizar cinturon de alumno
 
-Similar a Vercel, configura las variables de entorno y conecta tu base de datos.
+### Health
 
-## 📝 Scripts Disponibles
+- `GET /api/health` - Estado de aplicacion y conexion a base de datos
+
+## Modelo de Datos
+
+El proyecto usa Prisma con PostgreSQL y estos modelos principales:
+
+- `User` con rol, perfil, cinturon, avatar y estado de email.
+- `RefreshToken` para sesiones renovables y revocacion en logout.
+- `PasswordResetToken` para recuperacion de contrasena con expiracion.
+- `Conversation`, `ConversationParticipant` y `Message` para chat.
+- `Document` para recursos educativos subidos por instructores/admins.
+- `Friendship`, `FriendRequest` y `BlockedUser` para relaciones sociales.
+
+## Deploy
+
+### Docker Compose en Produccion
+
+El despliegue principal esta preparado con Docker Compose:
 
 ```bash
-npm run dev          # Desarrollo
-npm run build        # Build para producción
-npm run start        # Iniciar en producción
-npm run lint         # Linter
-
-npm run db:generate  # Generar cliente Prisma
-npm run db:push      # Sincronizar schema con BD (sin migraciones)
-npm run db:migrate   # Crear y ejecutar migraciones
-npm run db:studio    # Abrir Prisma Studio
+docker compose up -d --build
 ```
 
-## 🤝 Contribuir
+Servicios incluidos:
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+- `postgres`: PostgreSQL 16 Alpine con healthcheck y volumen persistente.
+- `app`: Next.js ejecutado con `server.js`, Prisma y Socket.IO.
+- `nginx`: reverse proxy HTTPS con soporte para WebSocket.
 
-## 📄 Licencia
+### Variables de Produccion
 
-Este proyecto es privado y está protegido por derechos de autor.
+Configura como minimo:
 
-## 👤 Autor
+- `POSTGRES_PASSWORD`
+- `POSTGRES_USER`
+- `POSTGRES_DB`
+- `DATABASE_URL` si no usas la generada por compose
+- `JWT_SECRET`
+- `JWT_REFRESH_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM`
+- `INSTRUCTOR_SECRET_PASSWORD`
 
-**Mario Gutiérrez**
+### Nginx y SSL
+
+`nginx/nginx.conf` redirige HTTP a HTTPS, usa certificados de Let's Encrypt y reenvia correctamente WebSocket mediante los headers `Upgrade` y `Connection`.
+
+### Vercel
+
+No es el despliegue recomendado para la version actual porque el chat en tiempo real depende del servidor Node personalizado con Socket.IO. Para mantener realtime, usa Docker/VPS o un proveedor que permita ejecutar `node server.js` con WebSocket.
+
+## Licencia
+
+Este proyecto es privado y esta protegido por derechos de autor.
+
+## Autor
+
+**Mario Gutierrez**
+
 - Instructor de Taekwondo
-- Madrid, España
+- Madrid, Espana
 
 ---
 
-¡Hecho con ❤️ y 🥋 por la comunidad de Taekwondo!
+Hecho por la comunidad de Taekwondo Mario Gutierrez.
