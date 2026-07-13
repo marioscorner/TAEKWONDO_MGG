@@ -1,9 +1,12 @@
 const { createServer } = require("node:http");
 const next = require("next");
+const { loadEnvConfig } = require("@next/env");
 const { Server } = require("socket.io");
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = process.env.HOSTNAME || "0.0.0.0";
+loadEnvConfig(process.cwd(), dev);
+
+const hostname = process.env.BIND_HOST || "0.0.0.0";
 const port = Number(process.env.PORT || 3000);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
@@ -80,6 +83,7 @@ app.prepare().then(() => {
   });
 
   server.listen(port, hostname, () => {
-    console.log(`> Ready on http://${hostname}:${port}`);
+    const displayHost = hostname === "0.0.0.0" ? "localhost" : hostname;
+    console.log(`> Ready on http://${displayHost}:${port}`);
   });
 });

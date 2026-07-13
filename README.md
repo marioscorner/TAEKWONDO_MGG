@@ -9,8 +9,9 @@ Aplicacion web full-stack para la escuela de Taekwondo de Mario Gutierrez en Mad
 - **Next.js 15.5** con App Router
 - **React 19**
 - **TypeScript 5**
-- **Tailwind CSS 3.4** con modo oscuro por clase
-- **Radix UI** para componentes accesibles
+- **Tailwind CSS 3.4** con variables CSS y modo oscuro por clase
+- **shadcn/ui** con primitivas **Radix UI** para componentes accesibles
+- **class-variance-authority**, **clsx** y **tailwind-merge** para variantes y clases CSS
 - **Lucide React** para iconografia
 - **React Day Picker** para calendarios
 - **Swiper** para carruseles
@@ -18,7 +19,7 @@ Aplicacion web full-stack para la escuela de Taekwondo de Mario Gutierrez en Mad
 
 ### Backend
 
-- **Next.js API Routes** como backend integrado
+- **Next.js Route Handlers** como backend integrado en App Router
 - **Node.js 20** en Docker
 - **Servidor Node personalizado** (`server.js`) para Next.js + Socket.IO
 - **Socket.IO 4.8** para chat en tiempo real, escritura y eventos de lectura
@@ -35,7 +36,7 @@ Aplicacion web full-stack para la escuela de Taekwondo de Mario Gutierrez en Mad
 - **PostgreSQL 16 Alpine** en compose local y produccion
 - **Nginx** como reverse proxy con HTTPS y soporte WebSocket
 - **Let's Encrypt** para certificados SSL
-- **ESLint 9** con configuracion de Next.js
+- **ESLint 9** con flat config y reglas de Next.js
 - **PostCSS** y **Autoprefixer**
 - **ts-node** para scripts administrativos
 
@@ -90,9 +91,6 @@ SMTP_FROM="Taekwondo Mario Gutierrez <tu-email@gmail.com>"
 
 # Registro de instructores
 INSTRUCTOR_SECRET_PASSWORD="tu-contrasena-secreta"
-
-# Google Maps opcional
-# NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="tu-api-key"
 ```
 
 ### 4. Levantar PostgreSQL local con Docker
@@ -104,14 +102,14 @@ docker compose -f docker-compose.local.yml up -d
 ### 5. Preparar la base de datos
 
 ```bash
+npm run db:migrate:deploy
 npm run db:generate
-npm run db:push
 ```
 
-Tambien puedes usar migraciones versionadas:
+Para crear una nueva migracion durante desarrollo:
 
 ```bash
-npm run db:migrate
+npm run db:migrate -- --name nombre_del_cambio
 ```
 
 ### 6. Ejecutar en desarrollo
@@ -131,7 +129,7 @@ npm run start              # Iniciar servidor en produccion
 npm run lint               # Linter
 
 npm run db:generate        # Generar Prisma Client
-npm run db:push            # Sincronizar schema con PostgreSQL
+npm run db:push            # Sincronizar schema sin migracion (uso puntual)
 npm run db:migrate         # Crear y aplicar migraciones en desarrollo
 npm run db:migrate:deploy  # Aplicar migraciones en produccion
 npm run db:migrate:status  # Ver estado de migraciones
@@ -152,7 +150,7 @@ TAEKWONDO_MGG/
 │   └── create-superuser.ts       # Script para crear usuarios ADMIN
 ├── src/
 │   ├── app/
-│   │   ├── api/                  # Backend con API Routes
+│   │   ├── api/                  # Backend con Route Handlers
 │   │   │   ├── auth/             # Login, registro, refresh, logout, password reset
 │   │   │   ├── chat/             # Conversaciones, mensajes y lectura
 │   │   │   ├── documents/        # Listado, subida y borrado de documentos
@@ -341,9 +339,7 @@ Configura como minimo:
 
 `nginx/nginx.conf` redirige HTTP a HTTPS, usa certificados de Let's Encrypt y reenvia correctamente WebSocket mediante los headers `Upgrade` y `Connection`.
 
-### Vercel
-
-No es el despliegue recomendado para la version actual porque el chat en tiempo real depende del servidor Node personalizado con Socket.IO. Para mantener realtime, usa Docker/VPS o un proveedor que permita ejecutar `node server.js` con WebSocket.
+El despliegue recomendado para la version actual es Docker/VPS o un proveedor que permita ejecutar `node server.js` con WebSocket.
 
 ## Licencia
 
