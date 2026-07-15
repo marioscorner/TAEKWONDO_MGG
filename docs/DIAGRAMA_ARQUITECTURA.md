@@ -1,97 +1,85 @@
 # Diagrama de arquitectura del sistema
 
-Arquitectura general del proyecto Taekwondo MGG: capas, tecnologías y flujo de datos en una única vista.
-
----
-
-## Vista en una única imagen
-
-![Diagrama de arquitectura del sistema](./arquitectura-sistema.png)
-
-*Figura 1: Capas del sistema (Cliente → Next.js → Servicios → PostgreSQL + SMTP).*
+Arquitectura general del proyecto Taekwondo MGG: cliente web, servidor Next.js personalizado, realtime con Socket.IO, persistencia PostgreSQL y despliegue Docker/Nginx.
 
 ---
 
 ## Vista general (Mermaid)
 
-El siguiente diagrama Mermaid resume la arquitectura en un solo bloque. Debajo se incluye una **versión simplificada** para que quepa bien en una única imagen al exportar o en documentación.
-
 ```mermaid
 flowchart TB
-    subgraph CLIENTE["🖥️ Cliente (navegador)"]
+    subgraph CLIENTE["Cliente navegador"]
         UI[React 19 + Next.js App Router]
-        AUTH_CTX[AuthContext + estado user]
+        AUTH[AuthContext + localStorage]
         AXIOS[Axios + interceptor JWT]
-        UI --> AUTH_CTX
-        AUTH_CTX --> AXIOS
+        SOCKET_CLIENT[Socket.IO Client]
+        UI --> AUTH
+        UI --> AXIOS
+        UI --> SOCKET_CLIENT
     end
 
-    subgraph NEXT["⚙️ Next.js (servidor)"]
-        PAGES[Páginas: login, register, dashboard, amigos, chats, perfil, instructor, temario]
-        API[API Routes REST]
-        PAGES --> API
+    subgraph EDGE["Entrada HTTP/HTTPS"]
+        NGINX[Nginx reverse proxy]
     end
 
-    subgraph API_GRUPOS["API Routes"]
-        AUTH_API[auth: login, logout, refresh, register, password reset]
-        USERS_API[users: profile, search, delete-account]
-        FRIENDS_API[friends: list, requests, block]
-        CHAT_API[chat: conversations, messages]
-        UPLOAD_API[upload: image]
-        INSTRUCTOR_API[instructor: students, stats, belt]
-        AUTH_API --> USERS_API
-        USERS_API --> FRIENDS_API
-        FRIENDS_API --> CHAT_API
+    subgraph APP["Aplicacion Node.js"]
+        SERVER[server.js]
+        NEXT[Next.js App Router]
+        ROUTES[Route Handlers /api]
+        SOCKET_SERVER[Socket.IO Server]
+        UPLOADS[public/uploads]
+        SERVER --> NEXT
+        SERVER --> SOCKET_SERVER
+        NEXT --> ROUTES
+        ROUTES --> UPLOADS
     end
 
-    subgraph SERVICIOS["Servicios"]
-        PRISMA[Prisma ORM]
+    subgraph SERVICIOS["Lógica y servicios"]
+        PRISMA[Prisma Client]
+        ZOD[Zod validacion]
         JWT[jose JWT]
         BCRYPT[bcrypt]
-        ZOD[Zod validación]
+        MAIL[Nodemailer SMTP]
     end
 
-    subgraph DATOS["Datos"]
-        PG[(PostgreSQL)]
+    subgraph DATOS["Persistencia"]
+        PG[(PostgreSQL 16)]
+        FS[(Volumen uploads)]
     end
 
-    subgraph EXTERNO["Externo"]
-        SMTP[Nodemailer SMTP - email reset]
-    end
-
-    CLIENTE -->|HTTPS| NEXT
-    API --> API_GRUPOS
-    API_GRUPOS --> SERVICIOS
-    SERVICIOS --> PG
-    AUTH_API --> SMTP
+    CLIENTE -->|HTTPS / JSON| NGINX
+    SOCKET_CLIENT -->|WebSocket / polling fallback| NGINX
+    NGINX --> SERVER
+    ROUTES --> ZOD
+    ROUTES --> JWT
+    ROUTES --> BCRYPT
+    ROUTES --> PRISMA
+    ROUTES -.-> MAIL
+    SOCKET_SERVER --> JWT
+    SOCKET_SERVER --> ROUTES
+    PRISMA --> PG
+    UPLOADS --> FS
 ```
 
 ---
 
-## Versión compacta (para una única imagen)
-
-Diagrama simplificado en tres capas para exportar o incrustar como una sola figura.
+## Contenedores de produccion
 
 ```mermaid
 flowchart LR
-    subgraph Cliente
-        A[React + App Router + AuthContext + Axios]
+    subgraph DOCKER["docker-compose.yml"]
+        NGINX[nginx]
+        APP[app: node server.js]
+        POSTGRES[postgres:16-alpine]
+        UPLOADS[(uploads_data)]
+        PGDATA[(postgres_data)]
     end
 
-    subgraph NextJS
-        B[Páginas y API Routes]
-        C[Prisma + JWT + bcrypt + Zod]
-    end
-
-    subgraph Persistencia
-        D[(PostgreSQL)]
-        E[SMTP]
-    end
-
-    A -->|HTTP/JSON| B
-    B --> C
-    C --> D
-    C --> E
+    USER[Usuario] -->|80/443| NGINX
+    NGINX -->|HTTP + WebSocket upgrade| APP
+    APP --> POSTGRES
+    APP --> UPLOADS
+    POSTGRES --> PGDATA
 ```
 
 ---
@@ -100,19 +88,29 @@ flowchart LR
 
 | Capa | Contenido |
 |------|-----------|
-| **Cliente** | Next.js (React 19), App Router, AuthContext, Axios con interceptor de tokens, Tailwind, Radix UI |
-| **Next.js servidor** | Páginas (públicas/privadas), API Routes bajo `/api/*` |
-| **Lógica de negocio** | Validación Zod, Prisma, JWT (jose), bcrypt, requireAuth/requireRole |
-| **Persistencia** | PostgreSQL, tabla RefreshToken, PasswordResetToken, User, etc. |
-| **Externo** | Nodemailer (SMTP) para envío de emails de recuperación de contraseña |
+| **Cliente** | React 19, Next.js App Router, AuthContext, Axios, Socket.IO Client, Tailwind, shadcn/ui |
+| **Entrada** | Nginx en produccion, HTTPS, certificados Let's Encrypt y soporte WebSocket |
+| **Servidor Node** | `server.js`, Next.js, Route Handlers bajo `/api/*`, Socket.IO Server |
+| **Logica de negocio** | Zod, Prisma, JWT con `jose`, bcrypt, middleware `requireAuth`/`requireRole` |
+| **Persistencia** | PostgreSQL, Prisma migrations, volumen Docker para datos |
+| **Archivos** | `public/uploads` para avatares, imagenes de grupo y documentos |
+| **Externo** | SMTP mediante Nodemailer para recuperacion de contraseña |
 
 ---
 
-## Flujo de una petición típica
+## Flujo de una peticion HTTP
 
-1. **Usuario** interactúa con la UI (React).
-2. **AuthContext** mantiene `user` y tokens en memoria; **Axios** añade `Authorization: Bearer <access>`.
-3. La petición llega a **Next.js** (mismo origen): si es página, se renderiza; si es `/api/*`, se ejecuta el route handler.
-4. El **route** valida con Zod, opcionalmente usa **requireAuth** (JWT), y usa **Prisma** para leer/escribir en **PostgreSQL**.
-5. Si hace falta enviar email (reset contraseña), se llama a **Nodemailer** (SMTP).
-6. La respuesta JSON vuelve al **cliente**; si es 401, el interceptor intenta **refresh** y reintenta.
+1. El usuario interactua con la UI React.
+2. Axios envia la peticion al mismo origen con `Authorization: Bearer <access>` cuando procede.
+3. En produccion, Nginx reenvia la peticion a `server.js`; en desarrollo, el navegador llama directamente a `localhost:3000`.
+4. Next.js ejecuta el Route Handler correspondiente en `src/app/api/**/route.ts`.
+5. El handler valida con Zod, comprueba autenticacion/rol, y usa Prisma para leer o escribir en PostgreSQL.
+6. Si hay uploads, se guarda el archivo en `public/uploads` y la metadata en PostgreSQL.
+7. La respuesta JSON vuelve al cliente; si hay un 401, el interceptor intenta refrescar tokens.
+
+## Flujo realtime
+
+1. El cliente abre una conexion Socket.IO usando el access token.
+2. `server.js` valida el token con `jose` y registra el socket en salas `conversation:{id}`.
+3. Los mensajes se persisten mediante los Route Handlers y se emiten eventos Socket.IO.
+4. Si WebSocket no esta disponible, Socket.IO puede usar polling como fallback de transporte.

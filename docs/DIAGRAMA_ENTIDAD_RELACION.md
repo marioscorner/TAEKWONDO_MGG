@@ -12,12 +12,13 @@ erDiagram
     USER ||--o{ PASSWORD_RESET_TOKEN : "solicita"
     USER ||--o{ CONVERSATION_PARTICIPANT : "participa"
     USER ||--o{ MESSAGE : "envía"
-    USER ||--o{ FRIENDSHIP_USER : "amigo origen"
-    USER ||--o{ FRIENDSHIP_FRIEND : "amigo destino"
-    USER ||--o{ FRIEND_REQUEST_FROM : "solicita"
-    USER ||--o{ FRIEND_REQUEST_TO : "recibe"
-    USER ||--o{ BLOCKED_USER_BLOCKER : "bloquea"
-    USER ||--o{ BLOCKED_USER_BLOCKED : "es bloqueado"
+    USER ||--o{ DOCUMENT : "sube"
+    USER ||--o{ FRIENDSHIP : "amigo origen"
+    USER ||--o{ FRIENDSHIP : "amigo destino"
+    USER ||--o{ FRIEND_REQUEST : "solicita"
+    USER ||--o{ FRIEND_REQUEST : "recibe"
+    USER ||--o{ BLOCKED_USER : "bloquea"
+    USER ||--o{ BLOCKED_USER : "es bloqueado"
 
     CONVERSATION ||--o{ CONVERSATION_PARTICIPANT : "incluye"
     CONVERSATION ||--o{ MESSAGE : "contiene"
@@ -88,6 +89,20 @@ erDiagram
         int fileSize
     }
 
+    DOCUMENT {
+        int id PK
+        string name
+        text description
+        string fileUrl
+        string fileName
+        int fileSize
+        string fileType
+        int uploadedBy FK "ref User.id"
+        enum visibility "PUBLIC, INSTRUCTOR_ONLY"
+        datetime createdAt
+        datetime updatedAt
+    }
+
     FRIENDSHIP {
         int id PK
         int userId FK "ref User.id"
@@ -118,6 +133,7 @@ erDiagram
     CONVERSATION_PARTICIPANT }o--|| USER : "es"
     MESSAGE }o--|| CONVERSATION : "en"
     MESSAGE }o--|| USER : "de"
+    DOCUMENT }o--|| USER : "uploader"
     FRIENDSHIP }o--|| USER : "user"
     FRIENDSHIP }o--|| USER : "friend"
     FRIEND_REQUEST }o--|| USER : "fromUser"
@@ -132,7 +148,7 @@ En Mermaid, las relaciones con el mismo nombre de entidad se distinguen por el r
 
 ## Diagrama ER simplificado por módulos
 
-Misma estructura pero agrupada por área (autenticación, chat, amistades) para leer mejor en GitHub.
+Misma estructura pero agrupada por área (autenticación, chat, documentos y amistades) para leer mejor en GitHub.
 
 ```mermaid
 erDiagram
@@ -203,14 +219,25 @@ erDiagram
         string fileType
     }
 
+    DOCUMENT {
+        int id PK
+        string name
+        string fileUrl
+        int uploadedBy FK
+        enum visibility
+        datetime createdAt
+    }
+
     USER ||--o{ CONVERSATION_PARTICIPANT : "participa"
     USER ||--o{ MESSAGE : "envía"
+    USER ||--o{ DOCUMENT : "sube"
     CONVERSATION ||--o{ CONVERSATION_PARTICIPANT : "tiene"
     CONVERSATION ||--o{ MESSAGE : "contiene"
     CONVERSATION_PARTICIPANT }o--|| CONVERSATION : "conversationId"
     CONVERSATION_PARTICIPANT }o--|| USER : "userId"
     MESSAGE }o--|| CONVERSATION : "conversationId"
     MESSAGE }o--|| USER : "senderId"
+    DOCUMENT }o--|| USER : "uploadedBy"
 
     %% ========== MÓDULO AMISTADES ==========
     FRIENDSHIP {
@@ -262,6 +289,7 @@ erDiagram
 | **Conversation** | `id` | — | 1:N ConversationParticipant, 1:N Message |
 | **ConversationParticipant** | `id` | `conversationId` → Conversation.id, `userId` → User.id | N:1 Conversation, N:1 User. UK(conversationId, userId) |
 | **Message** | `id` | `conversationId` → Conversation.id, `senderId` → User.id | N:1 Conversation, N:1 User |
+| **Document** | `id` | `uploadedBy` → User.id | N:1 User. Puede ser `PUBLIC` o `INSTRUCTOR_ONLY` |
 | **Friendship** | `id` | `userId` → User.id, `friendId` → User.id | N:1 User (origen), N:1 User (destino). UK(userId, friendId) |
 | **FriendRequest** | `id` | `fromUserId` → User.id, `toUserId` → User.id | N:1 User (from), N:1 User (to). UK(fromUserId, toUserId) |
 | **BlockedUser** | `id` | `blockerId` → User.id, `blockedId` → User.id | N:1 User (bloqueador), N:1 User (bloqueado). UK(blockerId, blockedId) |
@@ -277,4 +305,4 @@ erDiagram
 - **FK** = Foreign Key  
 - **UK** = Unique (atributo o par único en la BD)
 
-En Prisma, todas las relaciones de estas tablas usan `onDelete: Cascade`: al borrar un User se eliminan sus RefreshToken, PasswordResetToken, participaciones, mensajes, amistades, solicitudes y bloqueos asociados.
+En Prisma, las relaciones asociadas a `User` usan `onDelete: Cascade`: al borrar un User se eliminan sus RefreshToken, PasswordResetToken, participaciones, mensajes, documentos subidos, amistades, solicitudes y bloqueos asociados.

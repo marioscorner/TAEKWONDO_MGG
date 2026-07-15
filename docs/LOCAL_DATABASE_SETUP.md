@@ -1,141 +1,138 @@
 # Base de Datos PostgreSQL Local
 
-## Configuración
+Guia para ejecutar PostgreSQL local con Docker Compose y preparar el esquema con Prisma.
 
-Hemos migrado de Supabase a una base de datos PostgreSQL local usando Docker para evitar problemas de conectividad IPv6.
+## Configuracion
 
-## Comandos Básicos
+El proyecto incluye `docker-compose.local.yml`, que levanta solo PostgreSQL para desarrollo:
+
+- Imagen: `postgres:16-alpine`
+- Contenedor: `taekwondo_postgres`
+- Base de datos: `taekwondo_db`
+- Usuario: `postgres`
+- Puerto local: `5432`
+
+La conexion esperada en `.env.local` es:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres_local_password@localhost:5432/taekwondo_db?schema=public"
+```
+
+## Comandos Basicos
 
 ### Iniciar la base de datos
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.local.yml up -d
 ```
 
 ### Detener la base de datos
 
 ```bash
-docker compose down
+docker compose -f docker-compose.local.yml down
 ```
 
 ### Detener y eliminar datos
 
-```bash
-docker compose down -v
-```
-
-### Ver logs de la base de datos
+Esto elimina el volumen de PostgreSQL y todos los datos locales.
 
 ```bash
-docker compose logs -f postgres
+docker compose -f docker-compose.local.yml down -v
 ```
 
-### Ver estado de los contenedores
+### Ver logs
 
 ```bash
-docker compose ps
+docker compose -f docker-compose.local.yml logs -f postgres
 ```
 
-## Gestión de Migraciones
-
-### Crear una nueva migración
+### Ver estado del contenedor
 
 ```bash
-npm run db:migrate
+docker compose -f docker-compose.local.yml ps
 ```
 
-### Aplicar migraciones pendientes
+## Preparar el Esquema
+
+### Aplicar migraciones existentes
 
 ```bash
-npx prisma migrate deploy
+npm run db:migrate:deploy
 ```
 
-### Ver estado de las migraciones
-
-```bash
-npm run db:migrate:status
-```
-
-### Regenerar el cliente de Prisma
+### Regenerar Prisma Client
 
 ```bash
 npm run db:generate
 ```
 
+### Ver estado de migraciones
+
+```bash
+npm run db:migrate:status
+```
+
+### Crear una nueva migracion durante desarrollo
+
+```bash
+npm run db:migrate -- --name nombre_del_cambio
+```
+
 ## Acceso Directo a PostgreSQL
 
-### Conectar con psql
+### Abrir psql dentro del contenedor
 
 ```bash
 docker exec -it taekwondo_postgres psql -U postgres -d taekwondo_db
 ```
 
-### Comandos útiles en psql
+### Comandos utiles en psql
 
 ```sql
--- Ver todas las tablas
+-- Ver tablas
 \dt
 
 -- Describir una tabla
 \d "User"
 
--- Salir de psql
+-- Salir
 \q
 ```
 
-## Gestión de Datos
+## Gestion de Datos
 
-### Ver la base de datos con Prisma Studio
+### Abrir Prisma Studio
 
 ```bash
 npm run db:studio
 ```
 
-Esto abrirá Prisma Studio en `http://localhost:5555` donde puedes ver y editar datos visualmente.
+Prisma Studio queda disponible normalmente en `http://localhost:5555`.
 
-### Reiniciar la base de datos (eliminar todos los datos)
+### Reiniciar la base de datos local
 
 ```bash
-# Opción 1: Solo eliminar datos (mantener esquema)
-npx prisma migrate reset
-
-# Opción 2: Eliminar volumen de Docker (eliminar todo)
-docker compose down -v
-docker compose up -d
-npm run db:migrate
+docker compose -f docker-compose.local.yml down -v
+docker compose -f docker-compose.local.yml up -d
+npm run db:migrate:deploy
+npm run db:generate
 ```
 
-## Usuarios de Prueba
+El repositorio no incluye un seed automatico de usuarios de prueba. Para crear un administrador usa:
 
-Los siguientes usuarios están pre-creados:
-
-**Instructor:**
-- Email: mariogugon@outlook.com
-- Password: password123
-- Role: INSTRUCTOR
-
-**Alumno:**
-- Email: alumno@test.com
-- Password: alumno123
-- Role: ALUMNO
-
-## Conexión desde la Aplicación
-
-La cadena de conexión está en `.env` y `.env.local`:
-
-```
-DATABASE_URL="postgresql://postgres:postgres_local_password@localhost:5432/taekwondo_db?schema=public"
+```bash
+npm run create-superuser
 ```
 
-## Backup y Restauración
+## Backup y Restauracion
 
-### Crear un backup
+### Crear backup
 
 ```bash
 docker exec taekwondo_postgres pg_dump -U postgres taekwondo_db > backup.sql
 ```
 
-### Restaurar desde un backup
+### Restaurar backup
 
 ```bash
 docker exec -i taekwondo_postgres psql -U postgres taekwondo_db < backup.sql
@@ -143,54 +140,41 @@ docker exec -i taekwondo_postgres psql -U postgres taekwondo_db < backup.sql
 
 ## Troubleshooting
 
-### El puerto 5432 ya está en uso
+### El puerto 5432 ya esta en uso
 
-Si tienes otra instancia de PostgreSQL corriendo localmente:
+Si tienes otra instancia de PostgreSQL corriendo localmente, puedes detenerla o cambiar el puerto publicado en `docker-compose.local.yml`:
 
-```bash
-# Opción 1: Detener PostgreSQL local
-sudo systemctl stop postgresql
-
-# Opción 2: Cambiar el puerto en docker-compose.yml
+```yaml
 ports:
-  - "5433:5432"  # Usar puerto 5433 en lugar de 5432
+  - "5433:5432"
+```
 
-# Y actualizar DATABASE_URL en .env
+Despues actualiza `.env.local`:
+
+```env
 DATABASE_URL="postgresql://postgres:postgres_local_password@localhost:5433/taekwondo_db?schema=public"
 ```
 
 ### No puedo conectarme a la base de datos
 
-1. Verifica que el contenedor está corriendo:
-   ```bash
-   docker compose ps
-   ```
+Verifica el contenedor:
 
-2. Verifica los logs:
-   ```bash
-   docker compose logs postgres
-   ```
+```bash
+docker compose -f docker-compose.local.yml ps
+```
 
-3. Reinicia el contenedor:
-   ```bash
-   docker compose restart
-   ```
+Revisa logs:
 
-## Ventajas de PostgreSQL Local
+```bash
+docker compose -f docker-compose.local.yml logs postgres
+```
 
-✅ Sin problemas de conectividad IPv6
-✅ Desarrollo completamente offline
-✅ Control total sobre la base de datos
-✅ Mismo motor que en producción
-✅ Datos de prueba persistentes
-✅ Sin costos de servicio externo
+Reinicia el servicio:
 
-## Para Producción
+```bash
+docker compose -f docker-compose.local.yml restart postgres
+```
 
-En producción, puedes usar:
-- PostgreSQL en tu VPS
-- Supabase con IPv6
-- Cualquier otro proveedor de PostgreSQL
+## Produccion
 
-Solo necesitas cambiar la `DATABASE_URL` en las variables de entorno de producción.
-
+En produccion el repositorio usa `docker-compose.yml`, que levanta la aplicacion, PostgreSQL y Nginx. Consulta `DEPLOY.md` para el despliegue completo.

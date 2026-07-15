@@ -109,16 +109,13 @@ SMTP_FROM=Taekwondo <noreply@tudominio.com>
 
 ---
 
-## 🗄️ Actualizar Base de Datos
+## 🗄️ Preparar Base de Datos
 
-Después de configurar las variables de entorno, actualiza la base de datos:
+Después de configurar las variables de entorno, aplica las migraciones existentes y regenera Prisma Client:
 
 ```bash
-# Genera el cliente de Prisma
+npm run db:migrate:deploy
 npm run db:generate
-
-# Sincroniza el schema con la BD (crea la tabla PasswordResetToken)
-npm run db:push
 ```
 
 ---
@@ -222,14 +219,14 @@ JWT_REFRESH_SECRET="otro-secret-diferente"
 # URL de la app
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
-# SMTP para emails (NUEVO)
+# SMTP para emails
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=tu-email@gmail.com
 SMTP_PASS=abcd efgh ijkl mnop  # Contraseña de aplicación de Gmail
 SMTP_FROM=Taekwondo Mario Gutiérrez <tu-email@gmail.com>
 
-# Contraseña secreta para registro de instructores (NUEVO)
+# Contraseña secreta para registro de instructores
 INSTRUCTOR_SECRET_PASSWORD="tu-contraseña-secreta-aqui"
 ```
 
@@ -256,7 +253,8 @@ SMTP_FROM=Taekwondo <noreply@tudominio.com>
 ## ✅ Checklist de Configuración
 
 - [ ] Variables SMTP añadidas a `.env.local`
-- [ ] Base de datos actualizada (`npm run db:push`)
+- [ ] Migraciones aplicadas (`npm run db:migrate:deploy`)
+- [ ] Prisma Client generado (`npm run db:generate`)
 - [ ] Servidor reiniciado (`npm run dev`)
 - [ ] Probado solicitar recuperación
 - [ ] Email recibido correctamente

@@ -1,192 +1,169 @@
-# Lógica por capas y flujo de datos
+# Logica por capas y flujo de datos
 
-Documento que describe la **arquitectura en capas** del proyecto Taekwondo MGG y el **flujo de datos** entre ellas.
+Documento que describe la arquitectura en capas del proyecto Taekwondo MGG y el flujo de datos entre cliente, servidor, realtime, base de datos y almacenamiento local.
 
 ---
 
-## 1. Diagrama de lógica por capas
-
-El sistema se organiza en capas; cada una solo se comunica con la capa inferior (o con servicios externos). No se salta capas.
+## 1. Diagrama de logica por capas
 
 ```mermaid
 flowchart TB
-    subgraph CAPA_1["Capa 1: Presentación"]
-        direction TB
-        P1[Páginas y componentes React]
+    subgraph CAPA_1["Capa 1: Presentacion"]
+        P1[Paginas y componentes React]
         P2[Formularios, listas, chat UI]
-        P3[AuthContext, estado global]
-        P1 --> P2
-        P2 --> P3
+        P3[AuthContext y ThemeContext]
     end
 
-    subgraph CAPA_2["Capa 2: Cliente HTTP"]
-        direction TB
+    subgraph CAPA_2["Capa 2: Cliente"]
         C1[Axios instance]
-        C2[Interceptor: añadir Bearer token]
-        C3[Interceptor: refresh en 401]
-        C1 --> C2
-        C2 --> C3
+        C2[Interceptor JWT y refresh]
+        C3[Socket.IO Client]
     end
 
-    subgraph CAPA_3["Capa 3: API / Controladores"]
-        direction TB
-        A1[Route handlers GET POST etc]
+    subgraph CAPA_3["Capa 3: Servidor Node"]
+        S1[server.js]
+        S2[Next.js App Router]
+        S3[Socket.IO Server]
+    end
+
+    subgraph CAPA_4["Capa 4: Controladores"]
+        A1[Route handlers GET POST PATCH DELETE]
         A2[requireAuth y requireRole]
         A3[Respuestas JSON]
-        A1 --> A2
-        A2 --> A3
     end
 
-    subgraph CAPA_4["Capa 4: Lógica de aplicación"]
-        direction TB
-        L1[Validación Zod]
+    subgraph CAPA_5["Capa 5: Logica de aplicacion"]
+        L1[Validacion Zod]
         L2[Reglas de negocio]
-        L3[Hash contraseña, JWT]
-        L1 --> L2
-        L2 --> L3
+        L3[Hash contrasena y JWT]
+        L4[Gestion de archivos]
     end
 
-    subgraph CAPA_5["Capa 5: Acceso a datos"]
-        direction TB
+    subgraph CAPA_6["Capa 6: Acceso a datos"]
         D1[Prisma Client]
         D2[Queries y transacciones]
-        D1 --> D2
     end
 
-    subgraph CAPA_6["Capa 6: Persistencia y externos"]
-        direction LR
+    subgraph CAPA_7["Capa 7: Persistencia y externos"]
         DB[(PostgreSQL)]
+        FS[(public/uploads)]
         SMTP[SMTP Email]
     end
 
-    CAPA_1 -->|Peticiones HTTP| CAPA_2
-    CAPA_2 -->|JSON| CAPA_3
-    CAPA_3 --> CAPA_4
+    CAPA_1 --> CAPA_2
+    C1 --> C2
+    C2 -->|HTTP JSON| S1
+    C3 -->|WebSocket o polling fallback| S1
+    S1 --> S2
+    S1 --> S3
+    S2 --> CAPA_4
     CAPA_4 --> CAPA_5
-    CAPA_5 --> DB
-    CAPA_4 -.->|Reset contraseña| SMTP
+    CAPA_5 --> CAPA_6
+    CAPA_6 --> DB
+    L4 --> FS
+    CAPA_5 -.-> SMTP
+    S3 -->|Eventos chat| C3
 ```
 
 ---
 
 ## 2. Responsabilidades por capa
 
-| Capa | Responsabilidad | Tecnologías / Ubicación |
+| Capa | Responsabilidad | Tecnologias / Ubicacion |
 |------|-----------------|-------------------------|
-| **Presentación** | Mostrar UI, capturar acciones del usuario, mantener estado de sesión (user) | React, App Router, AuthContext, componentes en `src/app`, `src/components` |
-| **Cliente HTTP** | Enviar peticiones con credenciales, reintentar con refresh si 401 | Axios, `src/lib/api.ts` |
-| **API / Controladores** | Recibir request, decidir si requiere auth/rol, delegar en lógica y devolver respuesta | Route handlers en `src/app/api/**/route.ts`, `src/server/middleware/auth.ts` |
-| **Lógica de aplicación** | Validar entrada, aplicar reglas (ej. amistades ALUMNO), hashear contraseñas, firmar/verificar JWT | Zod, bcrypt, jose, código dentro de los route handlers |
-| **Acceso a datos** | Leer y escribir en la base de datos de forma estructurada | Prisma, `src/lib/prisma.ts`, modelos en `prisma/schema.prisma` |
-| **Persistencia y externos** | Almacenar datos y enviar correos | PostgreSQL, Nodemailer (SMTP) |
+| **Presentacion** | Mostrar UI, capturar acciones, mantener estado de sesion y tema | React, App Router, componentes en `src/app` y `src/components` |
+| **Cliente** | Peticiones HTTP autenticadas, refresh de tokens y conexion realtime | Axios en `src/lib/api.ts`, Socket.IO Client en `src/hooks/useChatSocket.tsx` |
+| **Servidor Node** | Ejecutar Next.js y Socket.IO sobre el mismo servidor HTTP | `server.js` |
+| **Controladores** | Recibir requests, validar auth/rol y devolver JSON | Route Handlers en `src/app/api/**/route.ts`, `src/server/middleware/auth.ts` |
+| **Logica de aplicacion** | Validar datos, aplicar reglas, hashear contraseñas, firmar/verificar JWT, gestionar uploads | Zod, bcrypt, jose, codigo dentro de handlers y libs |
+| **Acceso a datos** | Leer y escribir en la base de datos | Prisma Client en `src/lib/prisma.ts` |
+| **Persistencia y externos** | Guardar datos, guardar archivos y enviar correos | PostgreSQL, `public/uploads`, Nodemailer SMTP |
 
 ---
 
-## 3. Flujo de datos (entrada: petición del usuario)
-
-Flujo típico cuando el usuario hace una acción que requiere datos del servidor (por ejemplo ver perfil o enviar mensaje).
+## 3. Flujo HTTP tipico
 
 ```mermaid
 sequenceDiagram
     participant U as Usuario
-    participant V as Vista
+    participant V as Vista React
     participant A as Axios
-    participant R as Route API
-    participant L as Lógica
+    participant R as Route Handler
+    participant L as Logica
     participant P as Prisma
     participant DB as PostgreSQL
 
-    U->>V: Interacción
-    V->>V: Estado local o AuthContext
-    V->>A: api.get o api.post
+    U->>V: Interaccion
+    V->>A: api.get / api.post
     A->>A: Añadir Authorization Bearer
     A->>R: Request HTTP
-    R->>R: requireAuth si ruta protegida
-    R->>L: Validar body con Zod
-    L->>L: Reglas de negocio
-    L->>P: findUnique create update etc
+    R->>R: requireAuth / requireRole si procede
+    R->>L: Validar body/query con Zod
+    L->>L: Aplicar reglas de negocio
+    L->>P: findUnique/create/update/delete
     P->>DB: SQL
     DB-->>P: Resultado
-    P-->>L: Entidad o lista
-    L-->>R: Datos para respuesta
-    R-->>A: Response JSON
-    A-->>V: res.data
+    P-->>L: Datos
+    L-->>R: Payload de respuesta
+    R-->>A: JSON
+    A-->>V: data
     V-->>U: Actualizar UI
 ```
 
 ---
 
-## 4. Flujo de datos (entrada: petición pública)
-
-Páginas o APIs que no requieren autenticación (login, register, solicitar reset de contraseña).
+## 4. Flujo realtime de chat
 
 ```mermaid
-flowchart LR
-    A[Usuario en login o register] --> B[Formulario envía POST]
-    B --> C[API Route recibe]
-    C --> D[Zod valida body]
-    D --> E[Lógica: hash o buscar usuario]
-    E --> F[Prisma lee o escribe BD]
-    F --> G[Opcional: enviar email]
-    G --> H[Respuesta JSON]
-    H --> B
+sequenceDiagram
+    participant V as Chat UI
+    participant S as Socket.IO Client
+    participant N as server.js + Socket.IO Server
+    participant API as Route Handler mensajes
+    participant DB as PostgreSQL
+
+    V->>S: Conectar con access token
+    S->>N: Handshake Socket.IO
+    N->>N: Verificar JWT
+    V->>S: conversation:join
+    S->>N: Unirse a conversation:{id}
+    V->>API: POST /api/chat/conversations/:id/messages
+    API->>DB: Crear Message
+    API-->>V: Mensaje creado
+    API->>N: Emitir message.new a la sala
+    N-->>S: message.new
+    S-->>V: Actualizar chat
 ```
+
+Socket.IO usa WebSocket cuando esta disponible y puede caer a polling como transporte de respaldo.
 
 ---
 
-## 5. Flujo de datos (resumen en una vista)
-
-Diagrama único que resume capas y sentido del flujo de datos.
+## 5. Flujo de uploads
 
 ```mermaid
-flowchart TB
-    subgraph Entrada
-        E1[Usuario]
-        E2[Navegador]
-    end
+sequenceDiagram
+    participant V as UI
+    participant R as Route Handler upload
+    participant FS as public/uploads
+    participant DB as PostgreSQL
 
-    subgraph Presentación
-        P1[Vista React]
-        P2[AuthContext]
-    end
-
-    subgraph Transporte
-        T1[Axios + JWT en header]
-    end
-
-    subgraph Servidor
-        S1[Route handler]
-        S2[Validación y auth]
-        S3[Prisma]
-    end
-
-    subgraph Salida
-        O1[(PostgreSQL)]
-        O2[SMTP]
-    end
-
-    E1 --> E2
-    E2 --> P1
-    P1 --> P2
-    P2 --> T1
-    T1 -->|Request| S1
-    S1 --> S2
-    S2 --> S3
-    S3 --> O1
-    S2 -.-> O2
-    S3 -->|Response| S1
-    S1 -->|JSON| T1
-    T1 --> P1
-    P1 --> E2
+    V->>R: POST multipart/form-data
+    R->>R: requireAuth / requireRole
+    R->>R: Validar tipo y tamaño
+    R->>FS: Guardar archivo
+    R->>DB: Guardar metadata si aplica
+    R-->>V: URL publica /uploads/...
 ```
+
+Los avatares, imagenes de grupo y documentos se almacenan localmente bajo `public/uploads`. En produccion ese directorio se monta como volumen Docker.
 
 ---
 
-## 6. Reglas de la arquitectura en capas
+## 6. Reglas de la arquitectura
 
-- **Flujo descendente**: la presentación llama al cliente HTTP; el cliente HTTP llama a la API; la API usa lógica de aplicación; la lógica usa acceso a datos; el acceso a datos escribe o lee en persistencia.
-- **Sin saltos**: la presentación no llama directamente a Prisma ni a la base de datos; siempre pasa por la API.
-- **Datos de vuelta**: la respuesta fluye en sentido inverso (DB → Prisma → lógica → route → JSON → Axios → vista → usuario).
-- **Excepciones**: la capa de lógica puede llamar a servicios externos (SMTP) sin pasar por la capa de acceso a datos cuando la operación no es persistencia (ej. envío de email).
-
-Con esto se tiene una vista clara de la **lógica por capas** y del **flujo de datos** en el sistema.
+- La UI no accede directamente a Prisma ni a PostgreSQL.
+- Las escrituras de negocio pasan por Route Handlers y validacion.
+- Socket.IO se usa para eventos realtime, pero la persistencia de mensajes sigue pasando por la API y PostgreSQL.
+- Los archivos se guardan en filesystem local y su URL/metadata se persiste cuando corresponde.
+- Los servicios externos, como SMTP, se invocan desde la logica de aplicacion.
